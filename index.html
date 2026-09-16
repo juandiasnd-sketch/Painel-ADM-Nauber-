@@ -200,6 +200,23 @@
 
   .strip{ grid-column: 1 / -1; display:grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 22px); }
 
+  .insights-block{
+    margin-top: clamp(14px, 1.8vh, 22px); padding-top: clamp(12px, 1.5vh, 18px);
+    border-top: 1px solid var(--card-border);
+    flex: 1 1 auto; display:flex; flex-direction: column; min-height: 0;
+  }
+  .insights-title{
+    font-size: clamp(10px, 0.8vw, 12px); text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--ink-faint); margin-bottom: clamp(8px, 1.1vh, 12px);
+  }
+  .insights-list{ list-style: none; margin:0; padding:0; display:flex; flex-direction: column; gap: clamp(8px, 1.1vh, 12px); overflow: hidden; }
+  .insight-item{ display:flex; align-items:flex-start; gap: 8px; font-size: clamp(11.5px, 0.92vw, 13.5px); color: var(--ink-dim); line-height: 1.4; }
+  .insight-dot{ width:7px; height:7px; border-radius:50%; margin-top: 5px; flex:none; }
+  .insight-dot.alert{ background: var(--red); }
+  .insight-dot.warn{ background: var(--amber); }
+  .insight-dot.ok{ background: var(--green); }
+  .insights-empty{ color: var(--ink-faint); font-size: clamp(11.5px, 0.92vw, 13.5px); }
+
   footer{
     flex: none; display:flex; justify-content: space-between; align-items:center;
     padding: 0 clamp(20px, 2.4vw, 44px) clamp(10px, 1.4vh, 16px);
@@ -286,6 +303,12 @@
           <div class="stat-label">Total acumulado</div>
           <div class="stat-chip"><span class="stat-value idle green" id="verba-total">—</span></div>
         </div>
+      </div>
+      <div class="insights-block">
+        <div class="insights-title">Pontos de atenção</div>
+        <ul class="insights-list" id="insights-list">
+          <li class="insights-empty">calculando…</li>
+        </ul>
       </div>
     </div>
 
@@ -471,6 +494,12 @@ function sameWeek(a, b){
 function sameDay(a,b){
   return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
 }
+function daysSince(d, ref){
+  return Math.floor((ref - d) / 86400000);
+}
+function fmtDateBR(d){
+  return String(d.getDate()).padStart(2,"0") + "/" + String(d.getMonth()+1).padStart(2,"0") + "/" + d.getFullYear();
+}
 
 function setText(id, text, idle){
   const el = document.getElementById(id);
@@ -483,9 +512,23 @@ function setDot(id, state){
   if (!el) return;
   el.className = "status " + state;
 }
+function renderInsights(insights){
+  const el = document.getElementById("insights-list");
+  if (!el) return;
+  if (!insights.length) {
+    el.innerHTML = '<li class="insights-empty">Nenhum ponto crítico no momento.</li>';
+    return;
+  }
+  const order = { alert: 0, warn: 1, ok: 2 };
+  insights.sort((a,b) => order[a.level] - order[b.level]);
+  el.innerHTML = insights.slice(0, 4).map(i =>
+    `<li class="insight-item"><span class="insight-dot ${i.level}"></span>${i.text}</li>`
+  ).join("");
+}
 
 async function loadAll(){
   let anyError = false;
+  const insights = [];
 
   // -------- Faturamento: NFs Faturadas (data | nome | quantidade | cadastro) --------
   try {
@@ -544,6 +587,19 @@ async function loadAll(){
         `<div class="week-bar-label${isCurrent ? ' current' : ''}">${isCurrent ? 'esta semana' : label}</div>`;
       chartEl.appendChild(col);
     });
+
+    // insight: última semana completa foi a mais fraca do período?
+    const completedWeeks = weekTotals.slice(0, -1);
+    if (completedWeeks.length >= 3) {
+      const lastCompleted = completedWeeks[completedWeeks.length - 1];
+      const minCompleted = Math.min(...completedWeeks.map(w => w.total));
+      if (lastCompleted.total === minCompleted && minCompleted > 0) {
+        const endDate = new Date(lastCompleted.monday); endDate.setDate(endDate.getDate() + 6);
+        insights.push({ level: "warn", text:
+          `Semana de ${lastCompleted.monday.getDate()}/${lastCompleted.monday.getMonth()+1}–` +
+          `${endDate.getDate()}/${endDate.getMonth()+1} teve o menor volume de notas das últimas semanas.` });
+      }
+    }
   } catch(e){ console.error("Faturamento:", e); setDot("dot-fat","alert"); anyError = true; }
 
   await new Promise(r => setTimeout(r, 200));
@@ -573,6 +629,13 @@ async function loadAll(){
       el.textContent = arrow + " " + fmtPct(Math.abs(delta));
       el.classList.toggle("up", delta > 0);
       setDot("dot-inad", delta <= 0 ? "ok" : "warn");
+      if (delta > 0) {
+        insights.push({ level: "alert", text:
+          `Inadimplência de 2026 já supera o acumulado anterior em ${fmtPct(delta)}.` });
+      } else if (delta <= -30) {
+        insights.push({ level: "ok", text:
+          `Inadimplência caiu ${fmtPct(Math.abs(delta))} frente ao acumulado anterior.` });
+      }
     } else {
       setDot("dot-inad", "idle");
     }
@@ -594,6 +657,16 @@ async function loadAll(){
     setText("assist-acum", count ? fmtPct(sum / count) : "sem dados", !count);
     setText("assist-mes", isFinite(mesVal) ? fmtPct(mesVal) : "sem dados", !isFinite(mesVal));
     setDot("dot-assist", rows.length ? "ok" : "idle");
+
+    const validDates = rows.map(r => parseBRDate(r[0])).filter(Boolean);
+    if (validDates.length) {
+      const last = new Date(Math.max(...validDates));
+      const days = daysSince(last, now);
+      if (days > 45) {
+        insights.push({ level: "warn", text:
+          `Assistência técnica sem novo lançamento há ${days} dias (último em ${fmtDateBR(last)}).` });
+      }
+    }
   } catch(e){ console.error("Assistência:", e); setDot("dot-assist","alert"); anyError = true; }
 
   await new Promise(r => setTimeout(r, 200));
@@ -612,6 +685,16 @@ async function loadAll(){
     setText("fretes-acum", count25 ? fmtPct(sum25 / count25) : "sem dados", !count25);
     setText("fretes-mes", isFinite(mesVal) ? fmtPct(mesVal) : "sem dados", !isFinite(mesVal));
     setDot("dot-fretes", rows.length ? "ok" : "idle");
+
+    const validDatesF = rows.map(r => parseBRDate(r[0])).filter(Boolean);
+    if (validDatesF.length) {
+      const lastF = new Date(Math.max(...validDatesF));
+      const daysF = daysSince(lastF, now);
+      if (daysF > 45) {
+        insights.push({ level: "warn", text:
+          `Fretes sem novo lançamento há ${daysF} dias (último em ${fmtDateBR(lastF)}).` });
+      }
+    }
   } catch(e){ console.error("Fretes:", e); setDot("dot-fretes","alert"); anyError = true; }
 
   await new Promise(r => setTimeout(r, 200));
@@ -658,6 +741,13 @@ async function loadAll(){
       cd.textContent = arrow + " " + fmtPct(Math.abs(delta));
       cd.classList.toggle("up", delta < 0);
       setDot("dot-cresc", delta >= 0 ? "ok" : "warn");
+      if (delta <= -30) {
+        insights.push({ level: "alert", text:
+          `Faturamento mensal caiu ${fmtPct(Math.abs(delta))} em relação ao mês anterior.` });
+      } else if (delta >= 30) {
+        insights.push({ level: "ok", text:
+          `Faturamento mensal cresceu ${fmtPct(delta)} em relação ao mês anterior.` });
+      }
     } else {
       arrowEl.classList.add("idle");
       arrowEl.textContent = "";
@@ -681,7 +771,12 @@ async function loadAll(){
     setText("itens-atual", isFinite(atual) ? fmtPct(atual) : "sem dados", !isFinite(atual));
     setText("itens-media", count ? fmtPct(sum / count) : "sem dados", !count);
     setDot("dot-itens", count ? "ok" : "idle");
+    if (!count) {
+      insights.push({ level: "warn", text: "A aba de Itens Faltantes ainda não tem nenhum lançamento." });
+    }
   } catch(e){ console.error("Itens faltantes:", e); setDot("dot-itens","alert"); anyError = true; }
+
+  renderInsights(insights);
 
   document.getElementById("syncDot").className = "sync-dot" + (anyError ? " stale" : "");
   document.getElementById("syncText").textContent =
