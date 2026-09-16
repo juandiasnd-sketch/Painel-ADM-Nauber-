@@ -360,6 +360,16 @@ function parseBRNumber(raw){
     }
   } else if (s.includes(",")) {
     s = s.replace(",", ".");
+  } else if ((s.match(/\./g) || []).length > 1) {
+    // ex.: "67.756.25" (erro de digitação comum: pontos como milhar,
+    // sem vírgula decimal) — trata o último grupo de 2 dígitos como decimal.
+    const parts = s.split(".");
+    const last = parts[parts.length - 1];
+    if (last.length === 2) {
+      s = parts.slice(0, -1).join("") + "." + last;
+    } else {
+      s = parts.join("");
+    }
   }
   return parseFloat(s);
 }
@@ -392,7 +402,22 @@ async function fetchTab(sheetName){
   if (!res.ok) throw new Error("HTTP " + res.status + " ao ler aba " + sheetName);
   const text = await res.text();
   const parsed = Papa.parse(text.trim(), { skipEmptyLines: true });
-  return parsed.data.slice(1); // remove linha de cabeçalho
+  return parsed.data; // inclui a linha de cabeçalho, propositalmente
+}
+
+// Confere se a aba retornada é realmente a esperada (o Google Sheets,
+// quando o nome não bate, pode devolver silenciosamente a primeira aba
+// da planilha em vez de dar erro — isso corrompia os cálculos).
+function rowsAfterValidation(allRows, sheetName, requiredHeaderWord){
+  const header = (allRows[0] || []).join(",").toLowerCase();
+  if (!header.includes(requiredHeaderWord)) {
+    console.warn(
+      `Aba "${sheetName}": cabeçalho não contém "${requiredHeaderWord}" ` +
+      `(veio: "${header}"). Ignorando — provável nome de aba incorreto ou aba vazia.`
+    );
+    return [];
+  }
+  return allRows.slice(1);
 }
 
 function sameWeek(a, b){
@@ -425,7 +450,7 @@ async function loadAll(){
 
   // -------- Faturamento: NFs Faturadas (data | nome | quantidade | cadastro) --------
   try {
-    const rows = await fetchTab(TABS.fat);
+    const rows = rowsAfterValidation(await fetchTab(TABS.fat), TABS.fat, "quantidade");
     const now = new Date();
     let mes = 0, semana = 0, dia = 0;
     for (const r of rows) {
@@ -439,12 +464,12 @@ async function loadAll(){
     setText("fat-amount", fmtInt(mes) + " NFs", mes === 0);
     setText("fat-dia", fmtInt(dia), false);
     setText("fat-semana", fmtInt(semana), false);
-    setDot("dot-fat", "ok");
+    setDot("dot-fat", rows.length ? "ok" : "idle");
   } catch(e){ console.error("Faturamento:", e); setDot("dot-fat","alert"); anyError = true; }
 
   // -------- Inadimplência: Inadimplencia 2026 (data | valor, histórico completo) --------
   try {
-    const rows = await fetchTab(TABS.inad);
+    const rows = rowsAfterValidation(await fetchTab(TABS.inad), TABS.inad, "valor");
     const today = new Date();
     let acum25 = 0, acum26 = 0;
     for (const r of rows) {
@@ -452,7 +477,10 @@ async function loadAll(){
       const v = parseBRNumber(r[1]);
       if (!d || !isFinite(v)) continue;
       if (d > today) continue;
-      if (d.getFullYear() === 2025) acum25 += v;
+      // "Acum 2025" = total acumulado desde o início até o fim de 2025
+      // (não é só o ano de 2025 isolado — o painel original soma tudo
+      // que veio antes, 2024 incluso). "Acum 2026" é só o ano corrente.
+      if (d.getFullYear() <= 2025) acum25 += v;
       if (d.getFullYear() === 2026) acum26 += v;
     }
     setText("inad-2025", fmtBRL(acum25));
@@ -472,7 +500,7 @@ async function loadAll(){
 
   // -------- Assistência técnica: data | Valores gastos | percentual --------
   try {
-    const rows = await fetchTab(TABS.assist);
+    const rows = rowsAfterValidation(await fetchTab(TABS.assist), TABS.assist, "percentual");
     const now = new Date();
     let sum = 0, count = 0, mesVal = NaN;
     for (const r of rows) {
@@ -484,12 +512,12 @@ async function loadAll(){
     }
     setText("assist-acum", count ? fmtPct(sum / count) : "sem dados", !count);
     setText("assist-mes", isFinite(mesVal) ? fmtPct(mesVal) : "sem dados", !isFinite(mesVal));
-    setDot("dot-assist", "ok");
+    setDot("dot-assist", rows.length ? "ok" : "idle");
   } catch(e){ console.error("Assistência:", e); setDot("dot-assist","alert"); anyError = true; }
 
   // -------- Fretes: data | Valores gastos | valor nf | percentual --------
   try {
-    const rows = await fetchTab(TABS.fretes);
+    const rows = rowsAfterValidation(await fetchTab(TABS.fretes), TABS.fretes, "percentual");
     const now = new Date();
     let sum25 = 0, count25 = 0, mesVal = NaN;
     for (const r of rows) {
@@ -501,12 +529,12 @@ async function loadAll(){
     }
     setText("fretes-acum", count25 ? fmtPct(sum25 / count25) : "sem dados", !count25);
     setText("fretes-mes", isFinite(mesVal) ? fmtPct(mesVal) : "sem dados", !isFinite(mesVal));
-    setDot("dot-fretes", "ok");
+    setDot("dot-fretes", rows.length ? "ok" : "idle");
   } catch(e){ console.error("Fretes:", e); setDot("dot-fretes","alert"); anyError = true; }
 
   // -------- Verba MKT / Bonificações: data | valor | tipo --------
   try {
-    const rows = await fetchTab(TABS.verba);
+    const rows = rowsAfterValidation(await fetchTab(TABS.verba), TABS.verba, "tipo");
     let mktTotal = 0, bonifTotal = 0;
     for (const r of rows) {
       const v = parseBRNumber(r[1]);
@@ -518,12 +546,12 @@ async function loadAll(){
     setText("verba-mkt", fmtBRL(mktTotal));
     setText("verba-bonif", fmtBRL(bonifTotal));
     setText("verba-total", fmtBRL(mktTotal + bonifTotal));
-    setDot("dot-verba", "ok");
+    setDot("dot-verba", rows.length ? "ok" : "idle");
   } catch(e){ console.error("Verba MKT:", e); setDot("dot-verba","alert"); anyError = true; }
 
   // -------- Crescimento: data | faturamento (mensal, R$) --------
   try {
-    const rows = await fetchTab(TABS.cresc);
+    const rows = rowsAfterValidation(await fetchTab(TABS.cresc), TABS.cresc, "faturamento");
     const series = [];
     for (const r of rows) {
       const d = parseBRDate(r[0]);
@@ -555,7 +583,7 @@ async function loadAll(){
 
   // -------- Itens faltantes: data | porcentagem --------
   try {
-    const rows = await fetchTab(TABS.itens);
+    const rows = rowsAfterValidation(await fetchTab(TABS.itens), TABS.itens, "porcentagem");
     const now = new Date();
     let sum = 0, count = 0, atual = NaN;
     for (const r of rows) {
