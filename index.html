@@ -148,15 +148,31 @@
 
   /* ---- Faturamento hero ---- */
   #fat{ grid-area: fat; }
-  .fat-hero{ flex:1 1 auto; display:flex; flex-direction: column; justify-content: center; align-items:center; gap: 6px; text-align: center; }
-  .fat-hero .amount{
-    font-family: var(--cond); font-weight: 700; font-size: clamp(46px, 5.4vw, 88px);
+  .fat-top{ flex: none; display:flex; flex-direction: column; align-items:center; gap: 4px; text-align: center; padding-top: 4px; }
+  .fat-top .amount{
+    font-family: var(--cond); font-weight: 700; font-size: clamp(38px, 4.4vw, 68px);
     line-height: 1; color: var(--ink); letter-spacing: 0.01em;
   }
-  .fat-hero .amount.idle{ color: var(--ink-faint); font-size: clamp(28px, 3.2vw, 48px); }
-  .fat-hero .amount-label{ font-size: clamp(12px, 1vw, 15px); color: var(--ink-dim); }
-  .fat-mini{ display:flex; gap: clamp(10px, 1.2vw, 16px); margin-top: clamp(16px,2vh,26px); width: 100%; max-width: 420px; }
-  .fat-mini .stat{ flex: 1 1 0; }
+  .fat-top .amount.idle{ color: var(--ink-faint); font-size: clamp(24px, 2.8vw, 40px); }
+  .fat-top .amount-label{ font-size: clamp(12px, 1vw, 15px); color: var(--ink-dim); }
+  .fat-today{
+    margin-top: 6px; display:inline-flex; align-items:baseline; gap: 6px;
+    background: var(--chip-bg); border-radius: 999px; padding: 5px 16px;
+    font-size: clamp(11px, 0.85vw, 13px); color: var(--ink-dim);
+  }
+  .fat-today b{ font-family: var(--cond); font-size: clamp(14px, 1.2vw, 18px); color: var(--ink); }
+
+  .week-chart-wrap{ flex: 1 1 auto; display:flex; flex-direction: column; min-height: 0; margin-top: clamp(10px,1.5vh,18px); }
+  .week-chart-title{ font-size: clamp(10px, 0.8vw, 12px); color: var(--ink-faint); text-align:center; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .week-chart{ flex: 1 1 auto; display:flex; align-items:flex-end; gap: clamp(8px, 1vw, 16px); min-height: 60px; padding: 0 clamp(6px,1vw,14px); }
+  .week-bar-col{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .week-bar-value{ font-size: clamp(11px, 0.9vw, 14px); color: var(--ink-dim); margin-bottom:5px; font-weight:600; white-space:nowrap; }
+  .week-bar-value.best{ color: #8FE3A6; }
+  .week-bar{ width:100%; max-width:40px; border-radius:7px 7px 3px 3px; background: var(--chip-bg); min-height:4px; transition: height .4s ease; }
+  .week-bar.best{ background: var(--green); }
+  .week-bar.current{ box-shadow: 0 0 0 2px var(--green-soft); }
+  .week-bar-label{ font-size: clamp(9px, 0.75vw, 11px); color: var(--ink-faint); margin-top:6px; text-align:center; line-height:1.3; }
+  .week-bar-label.current{ color: var(--ink-dim); font-weight:600; }
 
   /* ---- Crescimento ---- */
   #cresc{ grid-area: cresc; }
@@ -205,19 +221,14 @@
 
     <div class="card" id="fat">
       <div class="pill-title"><span class="status idle" id="dot-fat"></span>Faturamento — Notas Emitidas</div>
-      <div class="fat-hero">
+      <div class="fat-top">
         <div class="amount idle" id="fat-amount">carregando…</div>
         <div class="amount-label" id="fat-label">notas fiscais no mês</div>
+        <div class="fat-today">hoje: <b id="fat-dia">—</b></div>
       </div>
-      <div class="fat-mini">
-        <div class="stat">
-          <div class="stat-label">Hoje</div>
-          <div class="stat-chip"><span class="stat-value idle" id="fat-dia">—</span></div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Semana</div>
-          <div class="stat-chip"><span class="stat-value idle" id="fat-semana">—</span></div>
-        </div>
+      <div class="week-chart-wrap">
+        <div class="week-chart-title">Comparativo semanal · notas emitidas</div>
+        <div class="week-chart" id="week-chart"></div>
       </div>
     </div>
 
@@ -471,19 +482,59 @@ async function loadAll(){
   try {
     const rows = await fetchValidatedTab(TABS.fat, "quantidade");
     const now = new Date();
-    let mes = 0, semana = 0, dia = 0;
+    let mes = 0, dia = 0;
+
+    // segunda-feira da semana que contém `d`
+    function mondayOf(d){
+      const x = new Date(d); x.setHours(0,0,0,0);
+      const day = (x.getDay() + 6) % 7;
+      x.setDate(x.getDate() - day);
+      return x;
+    }
+
+    const thisMonday = mondayOf(now);
+    const WEEKS = 6; // últimas 6 semanas, incluindo a atual
+    const weekTotals = []; // [{monday, total}], da mais antiga pra mais nova
+    for (let i = WEEKS - 1; i >= 0; i--){
+      const m = new Date(thisMonday); m.setDate(m.getDate() - i * 7);
+      weekTotals.push({ monday: m, total: 0 });
+    }
+
     for (const r of rows) {
       const d = parseBRDate(r[0]);
       const q = parseBRNumber(r[2]);
       if (!d || !isFinite(q)) continue;
       if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) mes += q;
-      if (sameWeek(d, now)) semana += q;
       if (sameDay(d, now)) dia += q;
+      const wm = mondayOf(d).getTime();
+      const bucket = weekTotals.find(w => w.monday.getTime() === wm);
+      if (bucket) bucket.total += q;
     }
+
     setText("fat-amount", fmtInt(mes) + " NFs", mes === 0);
     setText("fat-dia", fmtInt(dia), false);
-    setText("fat-semana", fmtInt(semana), false);
     setDot("dot-fat", rows.length ? "ok" : "idle");
+
+    // renderiza o gráfico de barras comparando as semanas
+    const chartEl = document.getElementById("week-chart");
+    const maxTotal = Math.max(1, ...weekTotals.map(w => w.total));
+    const bestTotal = Math.max(...weekTotals.map(w => w.total));
+    chartEl.innerHTML = "";
+    weekTotals.forEach((w, idx) => {
+      const isCurrent = idx === weekTotals.length - 1;
+      const isBest = w.total === bestTotal && bestTotal > 0;
+      const heightPct = Math.max(6, (w.total / maxTotal) * 100);
+      const endDate = new Date(w.monday); endDate.setDate(endDate.getDate() + 6);
+      const label = w.monday.getDate() + "/" + (w.monday.getMonth()+1) + "–" +
+                    endDate.getDate() + "/" + (endDate.getMonth()+1);
+      const col = document.createElement("div");
+      col.className = "week-bar-col";
+      col.innerHTML =
+        `<div class="week-bar-value${isBest ? ' best' : ''}">${fmtInt(w.total)}</div>` +
+        `<div class="week-bar${isBest ? ' best' : ''}${isCurrent ? ' current' : ''}" style="height:${heightPct}%"></div>` +
+        `<div class="week-bar-label${isCurrent ? ' current' : ''}">${isCurrent ? 'esta semana' : label}</div>`;
+      chartEl.appendChild(col);
+    });
   } catch(e){ console.error("Faturamento:", e); setDot("dot-fat","alert"); anyError = true; }
 
   await new Promise(r => setTimeout(r, 200));
