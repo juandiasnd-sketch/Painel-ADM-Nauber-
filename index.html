@@ -82,8 +82,8 @@
     grid-template-columns: 1.5fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
     grid-template-areas:
-      "fat   inad   inad"
-      "fat   cresc  verba";
+      "fat   inad   verba"
+      "fat   cresc  insights";
     min-height: 0;
   }
 
@@ -127,10 +127,8 @@
     flex: 1 1 auto;
     align-content: center;
   }
-  /* na Verba MKT, o stat-grid não deve competir por espaço com o bloco
-     de "pontos de atenção" abaixo dele — fica com sua altura natural,
-     e o restante do espaço vai todo para a lista de insights. */
-  #verba .stat-grid{ flex: 0 0 auto; }
+  /* Verba MKT ocupa seu próprio card e mantém os 3 indicadores centralizados. */
+  #verba .stat-grid{ flex: 1 1 auto; }
   .stat-grid.cols-4{ grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, auto); }
   .stat{ min-width: 0; }
   .stat-label{
@@ -159,6 +157,9 @@
 
   /* ---- Faturamento hero ---- */
   #fat{ grid-area: fat; }
+  #inad{ grid-area: inad; }
+  #verba{ grid-area: verba; }
+  #insights{ grid-area: insights; }
   .fat-top{ flex: none; display:flex; flex-direction: column; align-items:center; gap: 4px; text-align: center; padding-top: 4px; }
   .fat-top .amount{
     font-family: var(--cond); font-weight: 700; font-size: clamp(38px, 4.4vw, 68px);
@@ -206,15 +207,14 @@
   .strip{ grid-column: 1 / -1; display:grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 22px); }
 
   .insights-block{
-    margin-top: 6px; padding-top: 8px;
-    border-top: 1px solid var(--card-border);
-    flex: 1 1 auto; display:flex; flex-direction: column; justify-content: center;
-    min-height: 56px;
+    flex: 1 1 auto;
+    display:flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 0;
+    padding: 4px 2px 0;
   }
-  .insights-title{
-    font-size: clamp(9px, 0.75vw, 11px); text-transform: uppercase; letter-spacing: 0.05em;
-    color: var(--ink-faint); margin-bottom: 6px;
-  }
+  #insights .pill-title{ margin-bottom: clamp(16px, 2vh, 24px); }
   .insights-list{ list-style: none; margin:0; padding:0; display:flex; flex-direction: column; gap: 10px; overflow: hidden; }
   .insight-item{ display:flex; align-items:flex-start; gap: 8px; font-size: clamp(12px, 0.95vw, 14px); color: var(--ink-dim); line-height: 1.4; }
   .insight-dot{ width:7px; height:7px; border-radius:50%; margin-top: 5px; flex:none; }
@@ -223,14 +223,13 @@
   .insight-dot.ok{ background: var(--green); }
   .insights-empty{ color: var(--ink-faint); font-size: clamp(12px, 0.95vw, 14px); }
 
-  /* Verba MKT: 3 valores lado a lado numa linha só (em vez de 2 linhas
-     empilhadas), garantindo espaço pro bloco de pontos de atenção abaixo
-     mesmo em janelas menores. */
+  /* Verba MKT: 3 valores lado a lado numa única linha. */
   #verba .stat-grid.cols-4{
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: auto;
     gap: 8px;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    align-content: center;
   }
   #verba .stat-label{ margin-bottom: 4px; font-size: 10px; }
   #verba .stat-chip{ padding: 8px 6px; }
@@ -323,8 +322,11 @@
           <div class="stat-chip"><span class="stat-value idle green" id="verba-total">—</span></div>
         </div>
       </div>
+    </div>
+
+    <div class="card" id="insights">
+      <div class="pill-title"><span class="status idle" id="dot-insights"></span>Pontos de Atenção</div>
       <div class="insights-block">
-        <div class="insights-title">Pontos de atenção</div>
         <ul class="insights-list" id="insights-list">
           <li class="insights-empty">calculando…</li>
         </ul>
@@ -536,10 +538,12 @@ function renderInsights(insights){
   if (!el) return;
   if (!insights.length) {
     el.innerHTML = '<li class="insights-empty">Nenhum ponto crítico no momento.</li>';
+    setDot("dot-insights", "ok");
     return;
   }
   const order = { alert: 0, warn: 1, ok: 2 };
   insights.sort((a,b) => order[a.level] - order[b.level]);
+  setDot("dot-insights", insights[0].level);
   el.innerHTML = insights.slice(0, 4).map(i =>
     `<li class="insight-item"><span class="insight-dot ${i.level}"></span>${i.text}</li>`
   ).join("");
