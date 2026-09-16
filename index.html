@@ -397,27 +397,46 @@ function fmtInt(n){
   return Math.round(n).toLocaleString("pt-BR");
 }
 
-async function fetchTab(sheetName){
-  const res = await fetch(csvUrl(sheetName));
+async function fetchTab(sheetName, attempt){
+  attempt = attempt || 1;
+  const res = await fetch(csvUrl(sheetName), { cache: "no-store" });
   if (!res.ok) throw new Error("HTTP " + res.status + " ao ler aba " + sheetName);
   const text = await res.text();
   const parsed = Papa.parse(text.trim(), { skipEmptyLines: true });
   return parsed.data; // inclui a linha de cabeçalho, propositalmente
 }
 
-// Confere se a aba retornada é realmente a esperada (o Google Sheets,
-// quando o nome não bate, pode devolver silenciosamente a primeira aba
-// da planilha em vez de dar erro — isso corrompia os cálculos).
-function rowsAfterValidation(allRows, sheetName, requiredHeaderWord){
-  const header = (allRows[0] || []).join(",").toLowerCase();
-  if (!header.includes(requiredHeaderWord)) {
-    console.warn(
-      `Aba "${sheetName}": cabeçalho não contém "${requiredHeaderWord}" ` +
-      `(veio: "${header}"). Ignorando — provável nome de aba incorreto ou aba vazia.`
-    );
-    return [];
+// Busca uma aba e confere se o cabeçalho bate com o esperado. O Google
+// às vezes devolve momentaneamente a primeira aba da planilha em vez da
+// pedida (instabilidade do endpoint público) — quando isso acontece,
+// tenta de novo mais um par de vezes antes de desistir.
+async function fetchValidatedTab(sheetName, requiredHeaderWords, maxAttempts){
+  maxAttempts = maxAttempts || 3;
+  const words = Array.isArray(requiredHeaderWords) ? requiredHeaderWords : [requiredHeaderWords];
+  for (let attempt = 1; attempt <= maxAttempts; attempt++){
+    let allRows;
+    try {
+      allRows = await fetchTab(sheetName);
+    } catch(e) {
+      if (attempt === maxAttempts) throw e;
+      await new Promise(r => setTimeout(r, 400 * attempt));
+      continue;
+    }
+    const header = (allRows[0] || []).join(",").toLowerCase();
+    if (words.some(w => header.includes(w))) {
+      return allRows.slice(1);
+    }
+    if (attempt === maxAttempts) {
+      console.warn(
+        `Aba "${sheetName}": cabeçalho não contém nenhuma de [${words.join(", ")}] ` +
+        `após ${maxAttempts} tentativas (veio: "${header}"). Ignorando — ` +
+        `provável nome de aba incorreto ou aba vazia.`
+      );
+      return [];
+    }
+    await new Promise(r => setTimeout(r, 400 * attempt));
   }
-  return allRows.slice(1);
+  return [];
 }
 
 function sameWeek(a, b){
@@ -450,7 +469,7 @@ async function loadAll(){
 
   // -------- Faturamento: NFs Faturadas (data | nome | quantidade | cadastro) --------
   try {
-    const rows = rowsAfterValidation(await fetchTab(TABS.fat), TABS.fat, "quantidade");
+    const rows = await fetchValidatedTab(TABS.fat, "quantidade");
     const now = new Date();
     let mes = 0, semana = 0, dia = 0;
     for (const r of rows) {
@@ -467,9 +486,10 @@ async function loadAll(){
     setDot("dot-fat", rows.length ? "ok" : "idle");
   } catch(e){ console.error("Faturamento:", e); setDot("dot-fat","alert"); anyError = true; }
 
+  await new Promise(r => setTimeout(r, 200));
   // -------- Inadimplência: Inadimplencia 2026 (data | valor, histórico completo) --------
   try {
-    const rows = rowsAfterValidation(await fetchTab(TABS.inad), TABS.inad, "valor");
+    const rows = await fetchValidatedTab(TABS.inad, "valor");
     const today = new Date();
     let acum25 = 0, acum26 = 0;
     for (const r of rows) {
@@ -498,9 +518,10 @@ async function loadAll(){
     }
   } catch(e){ console.error("Inadimplência:", e); setDot("dot-inad","alert"); anyError = true; }
 
+  await new Promise(r => setTimeout(r, 200));
   // -------- Assistência técnica: data | Valores gastos | percentual --------
   try {
-    const rows = rowsAfterValidation(await fetchTab(TABS.assist), TABS.assist, "percentual");
+    const rows = await fetchValidatedTab(TABS.assist, "percentual");
     const now = new Date();
     let sum = 0, count = 0, mesVal = NaN;
     for (const r of rows) {
@@ -515,9 +536,10 @@ async function loadAll(){
     setDot("dot-assist", rows.length ? "ok" : "idle");
   } catch(e){ console.error("Assistência:", e); setDot("dot-assist","alert"); anyError = true; }
 
+  await new Promise(r => setTimeout(r, 200));
   // -------- Fretes: data | Valores gastos | valor nf | percentual --------
   try {
-    const rows = rowsAfterValidation(await fetchTab(TABS.fretes), TABS.fretes, "percentual");
+    const rows = await fetchValidatedTab(TABS.fretes, "percentual");
     const now = new Date();
     let sum25 = 0, count25 = 0, mesVal = NaN;
     for (const r of rows) {
@@ -532,9 +554,10 @@ async function loadAll(){
     setDot("dot-fretes", rows.length ? "ok" : "idle");
   } catch(e){ console.error("Fretes:", e); setDot("dot-fretes","alert"); anyError = true; }
 
+  await new Promise(r => setTimeout(r, 200));
   // -------- Verba MKT / Bonificações: data | valor | tipo --------
   try {
-    const rows = rowsAfterValidation(await fetchTab(TABS.verba), TABS.verba, "tipo");
+    const rows = await fetchValidatedTab(TABS.verba, ["tipo","situa"]);
     let mktTotal = 0, bonifTotal = 0;
     for (const r of rows) {
       const v = parseBRNumber(r[1]);
@@ -549,9 +572,10 @@ async function loadAll(){
     setDot("dot-verba", rows.length ? "ok" : "idle");
   } catch(e){ console.error("Verba MKT:", e); setDot("dot-verba","alert"); anyError = true; }
 
+  await new Promise(r => setTimeout(r, 200));
   // -------- Crescimento: data | faturamento (mensal, R$) --------
   try {
-    const rows = rowsAfterValidation(await fetchTab(TABS.cresc), TABS.cresc, "faturamento");
+    const rows = await fetchValidatedTab(TABS.cresc, "faturamento");
     const series = [];
     for (const r of rows) {
       const d = parseBRDate(r[0]);
@@ -581,9 +605,10 @@ async function loadAll(){
     }
   } catch(e){ console.error("Crescimento:", e); setDot("dot-cresc","alert"); anyError = true; }
 
+  await new Promise(r => setTimeout(r, 200));
   // -------- Itens faltantes: data | porcentagem --------
   try {
-    const rows = rowsAfterValidation(await fetchTab(TABS.itens), TABS.itens, "porcentagem");
+    const rows = await fetchValidatedTab(TABS.itens, "porcentagem");
     const now = new Date();
     let sum = 0, count = 0, atual = NaN;
     for (const r of rows) {
