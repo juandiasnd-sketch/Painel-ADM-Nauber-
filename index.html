@@ -205,21 +205,28 @@
   .strip{ grid-column: 1 / -1; display:grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 22px); }
 
   .insights-block{
-    margin-top: clamp(14px, 1.8vh, 22px); padding-top: clamp(12px, 1.5vh, 18px);
+    margin-top: 6px; padding-top: 8px;
     border-top: 1px solid var(--card-border);
     flex: 1 1 auto; display:flex; flex-direction: column; min-height: 0;
   }
   .insights-title{
-    font-size: clamp(10px, 0.8vw, 12px); text-transform: uppercase; letter-spacing: 0.05em;
-    color: var(--ink-faint); margin-bottom: clamp(8px, 1.1vh, 12px);
+    font-size: clamp(9px, 0.75vw, 11px); text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--ink-faint); margin-bottom: 6px;
   }
-  .insights-list{ list-style: none; margin:0; padding:0; display:flex; flex-direction: column; gap: clamp(8px, 1.1vh, 12px); overflow: hidden; }
-  .insight-item{ display:flex; align-items:flex-start; gap: 8px; font-size: clamp(11.5px, 0.92vw, 13.5px); color: var(--ink-dim); line-height: 1.4; }
-  .insight-dot{ width:7px; height:7px; border-radius:50%; margin-top: 5px; flex:none; }
+  .insights-list{ list-style: none; margin:0; padding:0; display:flex; flex-direction: column; gap: 6px; overflow: hidden; }
+  .insight-item{ display:flex; align-items:flex-start; gap: 7px; font-size: clamp(10.5px, 0.85vw, 12.5px); color: var(--ink-dim); line-height: 1.3; }
+  .insight-dot{ width:6px; height:6px; border-radius:50%; margin-top: 4px; flex:none; }
   .insight-dot.alert{ background: var(--red); }
   .insight-dot.warn{ background: var(--amber); }
   .insight-dot.ok{ background: var(--green); }
-  .insights-empty{ color: var(--ink-faint); font-size: clamp(11.5px, 0.92vw, 13.5px); }
+  .insights-empty{ color: var(--ink-faint); font-size: clamp(10.5px, 0.85vw, 12.5px); }
+
+  /* Verba MKT precisa ficar mais compacta pra sobrar espaço real pros
+     pontos de atenção — o card inteiro só tem ~200px de altura. */
+  #verba .stat-label{ margin-bottom: 4px; }
+  #verba .stat-chip{ padding: 8px 8px; }
+  #verba .stat-value{ font-size: clamp(14px, 1.3vw, 20px); }
+  #verba .stat-grid.cols-4{ gap: 8px; }
 
   footer{
     flex: none; display:flex; justify-content: space-between; align-items:center;
@@ -525,7 +532,7 @@ function renderInsights(insights){
   }
   const order = { alert: 0, warn: 1, ok: 2 };
   insights.sort((a,b) => order[a.level] - order[b.level]);
-  el.innerHTML = insights.slice(0, 4).map(i =>
+  el.innerHTML = insights.slice(0, 3).map(i =>
     `<li class="insight-item"><span class="insight-dot ${i.level}"></span>${i.text}</li>`
   ).join("");
 }
