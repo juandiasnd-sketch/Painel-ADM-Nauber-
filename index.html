@@ -223,10 +223,18 @@
 
   /* Verba MKT precisa ficar mais compacta pra sobrar espaço real pros
      pontos de atenção — o card inteiro só tem ~200px de altura. */
-  #verba .stat-label{ margin-bottom: 4px; }
-  #verba .stat-chip{ padding: 8px 8px; }
-  #verba .stat-value{ font-size: clamp(14px, 1.3vw, 20px); }
-  #verba .stat-grid.cols-4{ gap: 8px; }
+  /* Verba MKT precisa ficar mais compacta pra sobrar espaço real pros
+     pontos de atenção — o card inteiro só tem ~200px de altura.
+     3 valores lado a lado numa linha só, em vez de 2 linhas empilhadas. */
+  #verba .stat-grid.cols-4{
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+  #verba .stat-label{ margin-bottom: 4px; font-size: 10px; }
+  #verba .stat-chip{ padding: 7px 6px; }
+  #verba .stat-value{ font-size: clamp(12px, 1.05vw, 16px); }
 
   footer{
     flex: none; display:flex; justify-content: space-between; align-items:center;
@@ -310,7 +318,7 @@
           <div class="stat-label">Bonificações (acum.)</div>
           <div class="stat-chip"><span class="stat-value idle" id="verba-bonif">—</span></div>
         </div>
-        <div class="stat" style="grid-column: 1 / -1;">
+        <div class="stat">
           <div class="stat-label">Total acumulado</div>
           <div class="stat-chip"><span class="stat-value idle green" id="verba-total">—</span></div>
         </div>
