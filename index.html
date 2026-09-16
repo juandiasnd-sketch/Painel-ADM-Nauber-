@@ -126,6 +126,10 @@
     flex: 1 1 auto;
     align-content: center;
   }
+  /* na Verba MKT, o stat-grid não deve competir por espaço com o bloco
+     de "pontos de atenção" abaixo dele — fica com sua altura natural,
+     e o restante do espaço vai todo para a lista de insights. */
+  #verba .stat-grid{ flex: 0 0 auto; }
   .stat-grid.cols-4{ grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(2, auto); }
   .stat{ min-width: 0; }
   .stat-label{
