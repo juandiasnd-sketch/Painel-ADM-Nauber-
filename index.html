@@ -559,13 +559,13 @@
       <div class="pill-title"><span class="status idle" id="dot-cresc"></span>Evolução do Faturamento</div>
       <div class="evolucao-hero">
         <div class="evolucao-main">
-          <div class="evolucao-label" id="cresc-mes-label">Mês</div>
+          <div class="evolucao-label" id="cresc-mes-label">Mês %</div>
           <div class="evolucao-value idle" id="cresc-mes-destaque">—</div>
           <div class="evolucao-caption" id="cresc-mes-caption">vs. mês anterior</div>
         </div>
         <div class="evolucao-divider"></div>
         <div class="evolucao-main">
-          <div class="evolucao-label" id="cresc-ano-label">Ano</div>
+          <div class="evolucao-label" id="cresc-ano-label">Ano %</div>
           <div class="evolucao-value idle" id="cresc-ano-destaque">—</div>
           <div class="evolucao-caption" id="cresc-ano-caption">jan/2026 até hoje</div>
         </div>
@@ -644,7 +644,7 @@
       <span><span class="dot" style="background:var(--amber)"></span>requer atenção</span>
       <span><span class="dot" style="background:var(--ink-faint)"></span>sem dado no período</span>
     </div>
-    <div>Nauber Máquinas — BI ADM</div>
+    <div>Nauber Máquinas — BI ADM · V9 %</div>
   </footer>
 
 
@@ -1110,12 +1110,6 @@ async function loadAll(){
     }
     const mom=pctChange(cur,prev), vsAvg=pctChange(cur,avgYearValue), avgChange=average(changes);
 
-    function setEvolutionAmount(id,value){
-      const el=document.getElementById(id); if(!el)return;
-      el.classList.remove('idle','positive','negative');
-      if(!isFinite(value)){ el.textContent='sem dados'; el.classList.add('idle'); return; }
-      el.textContent=fmtBRL(value);
-    }
     function setEvolutionPercent(id,value){
       const el=document.getElementById(id); if(!el)return;
       el.classList.remove('idle','positive','negative');
@@ -1136,9 +1130,9 @@ async function loadAll(){
 
     if(curObj){
       const m=monthNameShort(curObj.date);
-      document.getElementById('cresc-mes-label').textContent=`Mês · ${m}`;
+      document.getElementById('cresc-mes-label').textContent=`Mês % · ${m}`;
       document.getElementById('cresc-mes-caption').textContent=curObj.key===currentKey?'vs. mês anterior':'último mês vs. anterior';
-      document.getElementById('cresc-ano-label').textContent=`Ano · ${displayYear}`;
+      document.getElementById('cresc-ano-label').textContent=`Ano % · ${displayYear}`;
       document.getElementById('cresc-ano-caption').textContent=`evolução jan/${displayYear} → ${m}`;
       document.getElementById('cresc-resumo').textContent=`Evolução jan–${m}: ${isFinite(yearEvolution)?fmtPct(yearEvolution):'sem dados'}`;
     } else {
