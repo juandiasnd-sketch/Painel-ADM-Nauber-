@@ -289,6 +289,148 @@
   .legend{ display:flex; gap: 18px; }
   .legend span{ display:flex; align-items:center; gap:6px; }
   .legend .dot{ width:7px; height:7px; border-radius:50%; }
+
+
+  /* ===== MODO TV / TELA CHEIA ===== */
+  :root{ --tv-gap: clamp(9px, 1.05vw, 18px); }
+  html, body{ width:100%; height:100%; }
+  body{ min-width:0; min-height:0; }
+
+  /* O painel possui 3 faixas reais: topo, meio e indicadores inferiores.
+     Declarar a terceira faixa evita que ela seja criada como linha "auto" e
+     empurre/corte os cards em telas 16:9. */
+  main{
+    grid-template-rows: minmax(0, 1.18fr) minmax(0, .88fr) minmax(0, .82fr);
+    gap: var(--tv-gap);
+    padding: clamp(10px,1.35vh,18px) clamp(14px,1.8vw,32px);
+    overflow:hidden;
+  }
+  .strip{
+    min-height:0;
+    height:100%;
+    gap:var(--tv-gap);
+  }
+  .strip > .card{ height:100%; }
+
+  .fullscreen-btn{
+    appearance:none; border:1px solid var(--card-border); background:var(--card-bg); color:var(--ink-dim);
+    border-radius:10px; padding:8px 11px; display:inline-flex; align-items:center; gap:7px;
+    font:600 clamp(10px,.72vw,12px) var(--sans); cursor:pointer; white-space:nowrap;
+    transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
+  }
+  .fullscreen-btn:hover{ background:var(--chip-bg); border-color:#3a3d46; color:var(--ink); }
+  .fullscreen-btn:active{ transform:scale(.98); }
+  .fullscreen-btn svg{ width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.8; }
+  .fullscreen-btn .fs-exit{ display:none; }
+  :fullscreen .fullscreen-btn .fs-enter{ display:none; }
+  :fullscreen .fullscreen-btn .fs-exit{ display:inline; }
+  :-webkit-full-screen .fullscreen-btn .fs-enter{ display:none; }
+  :-webkit-full-screen .fullscreen-btn .fs-exit{ display:inline; }
+
+  /* Mantém os cards densos o bastante para caberem em uma TV 16:9,
+     sem sacrificar a leitura dos números. */
+  .card{ padding:clamp(12px,1.35vw,20px) clamp(12px,1.35vw,20px); }
+  .pill-title{
+    margin-bottom:clamp(8px,1.15vh,14px);
+    padding:clamp(6px,.72vh,9px) clamp(14px,1.35vw,24px);
+    font-size:clamp(13px,1.02vw,18px);
+  }
+  .stat-grid{ gap:clamp(7px,.7vw,11px); }
+  .stat-label{ margin-bottom:5px; }
+  .stat-chip{ padding:clamp(7px,.85vh,11px) 6px; }
+  .compare-row{ margin-top:6px; }
+  .compare-pill{ font-size:clamp(9px,.64vw,11px); padding:3px 8px; }
+
+  /* Evolução do faturamento: destaque grande, porém sem estourar o card. */
+  #cresc .pill-title{ margin-bottom:8px; }
+  .evolucao-hero{ padding:8px 12px; margin-bottom:7px; gap:10px; }
+  .evolucao-label{ font-size:clamp(14px,1.05vw,18px); margin-bottom:1px; }
+  .evolucao-value{ font-size:clamp(28px,2.65vw,46px); }
+  .evolucao-caption{ font-size:clamp(8px,.62vw,10px); margin-top:2px; }
+  .evolucao-comparativos{ gap:6px; }
+  .evolucao-mini{ padding:5px 6px; }
+  .evolucao-mini span{ min-height:20px; font-size:clamp(8px,.58vw,9.5px); }
+  .evolucao-mini strong{ margin-top:2px; font-size:clamp(13px,1vw,17px); }
+  #cresc .compare-row{ margin-top:5px; }
+
+  /* Cabeçalho/rodapé mais eficientes em paisagem. */
+  header{ padding:clamp(9px,1.15vh,15px) clamp(14px,1.8vw,32px); }
+  header .logo{ height:clamp(26px,3.1vh,40px); }
+  .header-right{ gap:clamp(10px,1.5vw,28px); }
+  footer{ padding:0 clamp(14px,1.8vw,32px) clamp(6px,.8vh,10px); }
+
+  /* TV / notebook com pouca altura útil (inclusive navegador fora do fullscreen). */
+  @media (min-width:1100px) and (max-height:900px){
+    main{
+      grid-template-rows:minmax(0,1.12fr) minmax(0,.84fr) minmax(0,.82fr);
+      padding:9px 14px;
+      gap:9px;
+    }
+    header{ padding:8px 14px; }
+    footer{ padding:0 14px 5px; font-size:10px; }
+    .card{ padding:10px 11px; border-radius:12px; }
+    .pill-title{ margin-bottom:7px; padding:5px 14px; font-size:14px; }
+    .fat-top .amount{ font-size:clamp(30px,3.1vw,50px); }
+    .fat-top .amount-label{ font-size:12px; }
+    .fat-today{ margin-top:3px; padding:4px 12px; }
+    .week-chart-wrap{ margin-top:7px; }
+    .week-chart-title{ margin-bottom:4px; }
+    .week-bar-value{ margin-bottom:3px; }
+    .week-bar-label{ margin-top:3px; }
+    #inad .stat-label, #verba .stat-label, .strip .stat-label{ font-size:9px; }
+    #inad .stat-chip, #verba .stat-chip, .strip .stat-chip{ padding:6px 5px; }
+    #inad .stat-value, #verba .stat-value, .strip .stat-value{ font-size:clamp(12px,.95vw,16px); }
+    .compare-pill{ font-size:9px; padding:2px 7px; }
+    .insights-list{ gap:6px; }
+    .insight-item{ font-size:clamp(10px,.78vw,12px); line-height:1.28; }
+    .evolucao-hero{ padding:6px 10px; margin-bottom:5px; }
+    .evolucao-value{ font-size:clamp(27px,2.45vw,42px); }
+    .evolucao-mini{ padding:4px 5px; }
+    .evolucao-mini span{ min-height:18px; }
+    #cresc .compare-row{ margin-top:4px; }
+  }
+
+  /* Fullscreen em TV 16:9: usa o espaço extra para aumentar a leitura. */
+  :fullscreen body, :-webkit-full-screen body{ width:100vw; height:100vh; }
+  :fullscreen main, :-webkit-full-screen main{
+    padding:clamp(12px,1.45vh,20px) clamp(18px,2vw,36px);
+    gap:clamp(10px,1.15vw,18px);
+  }
+  @media (min-width:1600px) and (min-height:900px){
+    .stat-value{ font-size:clamp(17px,1.15vw,23px); }
+    #inad .stat-label, #verba .stat-label, .strip .stat-label{ font-size:clamp(10px,.62vw,12px); }
+    #inad .stat-value, #verba .stat-value, .strip .stat-value{ font-size:clamp(14px,1vw,20px); }
+    .compare-pill{ font-size:clamp(10px,.62vw,12px); }
+    .evolucao-value{ font-size:clamp(38px,2.8vw,54px); }
+    .evolucao-mini strong{ font-size:clamp(15px,1.05vw,20px); }
+  }
+
+
+
+  /* ===== AJUDA CONTEXTUAL ===== */
+  .info-btn{
+    width:16px; height:16px; min-width:16px; border-radius:50%;
+    border:1px solid rgba(255,255,255,.24); background:rgba(255,255,255,.05);
+    color:rgba(255,255,255,.58); font-family:var(--sans); font-size:10px; font-weight:800;
+    line-height:14px; padding:0; display:inline-flex; align-items:center; justify-content:center;
+    cursor:pointer; opacity:.52; transition:opacity .18s ease, background .18s ease, transform .18s ease;
+    vertical-align:middle; margin-left:6px; flex:none;
+  }
+  .info-btn:hover,.info-btn:focus-visible{ opacity:1; background:rgba(255,255,255,.12); transform:scale(1.06); outline:none; }
+  .pill-title .info-btn{ border-color:rgba(255,255,255,.34); color:rgba(255,255,255,.82); background:rgba(0,0,0,.12); }
+  .stat-label,.amount-label,.evolucao-caption,.week-chart-title{ position:relative; }
+  .info-overlay{ position:fixed; inset:0; background:rgba(5,6,8,.70); backdrop-filter:blur(5px); z-index:9999; display:none; align-items:center; justify-content:center; padding:24px; }
+  .info-overlay.open{ display:flex; }
+  .info-modal{ width:min(620px,92vw); max-height:min(78vh,720px); overflow:auto; background:#202126; border:1px solid #343740; border-radius:18px; box-shadow:0 24px 80px rgba(0,0,0,.48); }
+  .info-head{ display:flex; align-items:center; justify-content:space-between; gap:18px; padding:18px 20px 12px; border-bottom:1px solid #30323a; }
+  .info-head h3{ margin:0; font-family:var(--cond); text-transform:uppercase; font-size:22px; letter-spacing:.02em; }
+  .info-close{ border:0; background:transparent; color:var(--ink-dim); font-size:22px; cursor:pointer; padding:2px 7px; border-radius:8px; }
+  .info-close:hover{ background:rgba(255,255,255,.08); color:#fff; }
+  .info-body{ padding:16px 20px 20px; font-size:14px; color:#c8ccd5; line-height:1.55; }
+  .info-body strong{ color:#fff; }
+  .info-body .formula{ display:block; margin-top:10px; padding:10px 12px; border-radius:10px; background:#2b2e36; color:#e8eaf0; font-size:13px; }
+  @media (max-height:820px){ .info-btn{ width:14px;height:14px;min-width:14px;font-size:9px;line-height:12px;margin-left:4px; } }
+
 </style>
 </head>
 <body>
@@ -302,6 +444,10 @@
         <div class="label">Painel Administrativo <span class="made-by">by Juan</span></div>
         <div class="sub"><span class="sync-dot" id="syncDot"></span><span id="syncText">sincronizando…</span></div>
       </div>
+      <button class="fullscreen-btn" id="fullscreenBtn" type="button" title="Abrir painel em tela cheia">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+        <span class="fs-enter">Tela cheia</span><span class="fs-exit">Sair da tela cheia</span>
+      </button>
       <div class="clock" id="clock">00:00<span class="date" id="clockdate">—</span></div>
     </div>
   </header>
@@ -313,7 +459,7 @@
       <div class="fat-top">
         <div class="amount idle" id="fat-amount">carregando…</div>
         <div class="amount-label" id="fat-label">notas fiscais no mês</div>
-        <div class="fat-today">hoje: <b id="fat-dia">—</b></div>
+        <div class="fat-today"><span id="fat-day-label">hoje:</span> <b id="fat-dia">—</b></div>
       </div>
       <div class="week-chart-wrap">
         <div class="week-chart-title">Comparativo semanal · notas emitidas</div>
@@ -328,7 +474,7 @@
         <div class="stat"><div class="stat-label">2025 · jan até hoje</div><div class="stat-chip"><span class="stat-value idle" id="inad-2025">—</span></div></div>
         <div class="stat"><div class="stat-label">2026 · jan até hoje</div><div class="stat-chip"><span class="stat-value idle" id="inad-2026">—</span></div></div>
         <div class="stat"><div class="stat-label">Inadimplência 2026</div><div class="stat-chip"><span class="stat-value idle" id="inad-2026-atual">—</span></div></div>
-        <div class="stat"><div class="stat-label">Total comparável</div><div class="stat-chip"><span class="stat-value idle green" id="inad-total">—</span></div></div>
+        <div class="stat"><div class="stat-label">Total histórico</div><div class="stat-chip"><span class="stat-value idle green" id="inad-total">—</span></div></div>
       </div>
       <div class="compare-row">
         <span class="compare-pill" id="inad-var-25">2025 × 2024: —</span>
@@ -348,13 +494,13 @@
         <div class="evolucao-main">
           <div class="evolucao-label">Ano</div>
           <div class="evolucao-value idle" id="cresc-ano-destaque">—</div>
-          <div class="evolucao-caption">acumulado vs. ano anterior</div>
+          <div class="evolucao-caption">último mês vs. janeiro</div>
         </div>
       </div>
       <div class="evolucao-comparativos">
         <div class="evolucao-mini"><span>Mês × anterior</span><strong id="cresc-mom">—</strong></div>
-        <div class="evolucao-mini"><span>Mês × mesmo mês ano anterior</span><strong id="cresc-yoy">—</strong></div>
-        <div class="evolucao-mini"><span>Ano até hoje × ano anterior</span><strong id="cresc-ytd">—</strong></div>
+        <div class="evolucao-mini"><span>Mês × média do ano</span><strong id="cresc-yoy">—</strong></div>
+        <div class="evolucao-mini"><span>Média das variações mensais</span><strong id="cresc-ytd">—</strong></div>
       </div>
       <div class="compare-row"><span class="compare-pill" id="cresc-resumo">comparativo de variação</span></div>
     </div>
@@ -365,8 +511,8 @@
         <div class="stat"><div class="stat-label">Total do ano</div><div class="stat-chip"><span class="stat-value idle green" id="verba-total">—</span></div></div>
         <div class="stat"><div class="stat-label">Marketing · ano</div><div class="stat-chip"><span class="stat-value idle" id="verba-mkt">—</span></div></div>
         <div class="stat"><div class="stat-label">Bonificações · ano</div><div class="stat-chip"><span class="stat-value idle" id="verba-bonif">—</span></div></div>
-        <div class="stat"><div class="stat-label">Mês atual</div><div class="stat-chip"><span class="stat-value idle" id="verba-mes">—</span></div></div>
-        <div class="stat"><div class="stat-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="verba-prev">—</span></div></div>
+        <div class="stat"><div class="stat-label" id="verba-mes-label">Último mês</div><div class="stat-chip"><span class="stat-value idle" id="verba-mes">—</span></div></div>
+        <div class="stat"><div class="stat-label" id="verba-prev-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="verba-prev">—</span></div></div>
       </div>
       <div class="compare-row"><span class="compare-pill" id="verba-var">Variação mensal: —</span></div>
     </div>
@@ -381,27 +527,28 @@
     </div>
 
     <div class="strip">
-      <div class="card">
+      <div class="card" id="fretes">
         <div class="pill-title"><span class="status idle" id="dot-fretes"></span>Fretes</div>
-        <div class="stat-grid cols-3">
+        <div class="stat-grid cols-4">
           <div class="stat"><div class="stat-label">Média 2025</div><div class="stat-chip"><span class="stat-value idle" id="fretes-2025">—</span></div></div>
           <div class="stat"><div class="stat-label">Média 2026</div><div class="stat-chip"><span class="stat-value idle" id="fretes-2026">—</span></div></div>
-          <div class="stat"><div class="stat-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="fretes-prev">—</span></div></div>
+          <div class="stat"><div class="stat-label" id="fretes-cur-label">Último mês</div><div class="stat-chip"><span class="stat-value idle" id="fretes-cur">—</span></div></div>
+          <div class="stat"><div class="stat-label" id="fretes-prev-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="fretes-prev">—</span></div></div>
         </div>
         <div class="compare-row"><span class="compare-pill" id="fretes-var">2026 × 2025: —</span></div>
       </div>
-      <div class="card">
+      <div class="card" id="assist">
         <div class="pill-title"><span class="status idle" id="dot-assist"></span>Assistência Técnica</div>
         <div class="stat-grid cols-3">
           <div class="stat"><div class="stat-label">Média 2024</div><div class="stat-chip"><span class="stat-value idle" id="assist-2024">—</span></div></div>
           <div class="stat"><div class="stat-label">Média 2025</div><div class="stat-chip"><span class="stat-value idle" id="assist-2025">—</span></div></div>
           <div class="stat"><div class="stat-label">Média 2026</div><div class="stat-chip"><span class="stat-value idle" id="assist-2026">—</span></div></div>
-          <div class="stat"><div class="stat-label">Mês atual</div><div class="stat-chip"><span class="stat-value idle" id="assist-cur">—</span></div></div>
-          <div class="stat"><div class="stat-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="assist-prev">—</span></div></div>
+          <div class="stat"><div class="stat-label" id="assist-cur-label">Último mês</div><div class="stat-chip"><span class="stat-value idle" id="assist-cur">—</span></div></div>
+          <div class="stat"><div class="stat-label" id="assist-prev-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="assist-prev">—</span></div></div>
         </div>
         <div class="compare-row"><span class="compare-pill" id="assist-var">Variação: —</span></div>
       </div>
-      <div class="card">
+      <div class="card" id="itens">
         <div class="pill-title"><span class="status idle" id="dot-itens"></span>% Itens Faltantes</div>
         <div class="stat-grid">
           <div class="stat">
@@ -426,6 +573,14 @@
     </div>
     <div>Nauber Máquinas — BI ADM</div>
   </footer>
+
+
+  <div class="info-overlay" id="infoOverlay" aria-hidden="true">
+    <div class="info-modal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+      <div class="info-head"><h3 id="infoTitle">Informação</h3><button class="info-close" id="infoClose" type="button" aria-label="Fechar">×</button></div>
+      <div class="info-body" id="infoBody"></div>
+    </div>
+  </div>
 
 <script>
 /* =========================================================================
@@ -629,6 +784,39 @@ function sumRowsSmart(pack){
   if(vc<0)return NaN; let s=0,n=0; for(const r of pack.rows){const v=parseBRNumber(r[vc]);if(isFinite(v)){s+=v;n++;}} return n?s:NaN;
 }
 
+
+function exactCol(pack, groups, fallback){
+  const i=headerIndex(pack.header||[], groups);
+  return i>=0?i:fallback;
+}
+function exactSeries(pack, dateCol, valueCol){
+  const out=[];
+  for(const r of pack.rows){
+    const d=parseFlexibleDate(r[dateCol]);
+    const v=parseBRNumber(r[valueCol]);
+    if(d && isFinite(v)) out.push({date:d,value:v,row:r});
+  }
+  out.sort((a,b)=>a.date-b.date);
+  return out;
+}
+function sumExact(pack, valueCol, dateCol=null, year=null){
+  let s=0,n=0;
+  for(const r of pack.rows){
+    if(year!==null && dateCol!==null){
+      const d=parseFlexibleDate(r[dateCol]);
+      if(!d || d.getFullYear()!==year) continue;
+    }
+    const v=parseBRNumber(r[valueCol]);
+    if(isFinite(v)){s+=v;n++;}
+  }
+  return n?s:NaN;
+}
+function monthNameShort(d){
+  if(!d) return '';
+  return ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'][d.getMonth()]+'/'+String(d.getFullYear()).slice(-2);
+}
+function average(arr){ return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:NaN; }
+
 function sameWeek(a, b){
   const d1 = new Date(a); d1.setHours(0,0,0,0);
   const d2 = new Date(b); d2.setHours(0,0,0,0);
@@ -697,209 +885,134 @@ async function loadAll(){
   let anyError = false;
   const insights = [];
 
-  // -------- Faturamento: NFs Faturadas (data | nome | quantidade | cadastro) --------
+  // -------- Faturamento: NFs Faturadas (A=data | B=nome | C=quantidade | D=cadastro) --------
   try {
-    const rows = await fetchValidatedTab(TABS.fat, "quantidade");
-    const now = new Date();
-    let mes = 0, dia = 0;
+    const pack = await fetchSmartTab(TABS.fat);
+    const dc = exactCol(pack, [['data']], 0);
+    const qc = exactCol(pack, [['quantidade']], 2);
+    const entries=[];
+    for(const r of pack.rows){ const d=parseFlexibleDate(r[dc]), q=parseBRNumber(r[qc]); if(d&&isFinite(q)) entries.push({date:d,value:q}); }
+    entries.sort((a,b)=>a.date-b.date);
+    const now=new Date();
+    const latestDate=entries.length?entries[entries.length-1].date:null;
+    const hasCurrentMonth=entries.some(x=>x.date.getFullYear()===now.getFullYear()&&x.date.getMonth()===now.getMonth());
+    const anchor=hasCurrentMonth?now:(latestDate||now);
+    const mes=entries.filter(x=>x.date.getFullYear()===anchor.getFullYear()&&x.date.getMonth()===anchor.getMonth()).reduce((s,x)=>s+x.value,0);
+    const dayAnchor=hasCurrentMonth?now:latestDate;
+    const dia=dayAnchor?entries.filter(x=>sameDay(x.date,dayAnchor)).reduce((s,x)=>s+x.value,0):0;
+    setText("fat-amount",fmtInt(mes)+" NFs",!entries.length);
+    document.getElementById("fat-label").textContent = hasCurrentMonth ? "notas fiscais no mês atual" : `notas fiscais em ${monthNameShort(anchor)} · último mês com dados`;
+    document.getElementById("fat-day-label").textContent = hasCurrentMonth ? "hoje:" : `último dia (${dayAnchor?fmtDateBR(dayAnchor):'—'}):`;
+    setText("fat-dia",fmtInt(dia),!entries.length);
+    setDot("dot-fat",entries.length?"ok":"idle");
 
-    // segunda-feira da semana que contém `d`
-    function mondayOf(d){
-      const x = new Date(d); x.setHours(0,0,0,0);
-      const day = (x.getDay() + 6) % 7;
-      x.setDate(x.getDate() - day);
-      return x;
-    }
-
-    const thisMonday = mondayOf(now);
-    const WEEKS = 6; // últimas 6 semanas, incluindo a atual
-    const weekTotals = []; // [{monday, total}], da mais antiga pra mais nova
-    for (let i = WEEKS - 1; i >= 0; i--){
-      const m = new Date(thisMonday); m.setDate(m.getDate() - i * 7);
-      weekTotals.push({ monday: m, total: 0 });
-    }
-
-    for (const r of rows) {
-      const d = parseBRDate(r[0]);
-      const q = parseBRNumber(r[2]);
-      if (!d || !isFinite(q)) continue;
-      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) mes += q;
-      if (sameDay(d, now)) dia += q;
-      const wm = mondayOf(d).getTime();
-      const bucket = weekTotals.find(w => w.monday.getTime() === wm);
-      if (bucket) bucket.total += q;
-    }
-
-    setText("fat-amount", fmtInt(mes) + " NFs", mes === 0);
-    setText("fat-dia", fmtInt(dia), false);
-    setDot("dot-fat", rows.length ? "ok" : "idle");
-
-    // renderiza o gráfico de barras comparando as semanas
-    const chartEl = document.getElementById("week-chart");
-    const maxTotal = Math.max(1, ...weekTotals.map(w => w.total));
-    const bestTotal = Math.max(...weekTotals.map(w => w.total));
-    chartEl.innerHTML = "";
-    weekTotals.forEach((w, idx) => {
-      const isCurrent = idx === weekTotals.length - 1;
-      const isBest = w.total === bestTotal && bestTotal > 0;
-      const heightPct = Math.max(6, (w.total / maxTotal) * 100);
-      const endDate = new Date(w.monday); endDate.setDate(endDate.getDate() + 6);
-      const label = w.monday.getDate() + "/" + (w.monday.getMonth()+1) + "–" +
-                    endDate.getDate() + "/" + (endDate.getMonth()+1);
-      const col = document.createElement("div");
-      col.className = "week-bar-col";
-      col.innerHTML =
-        `<div class="week-bar-value${isBest ? ' best' : ''}">${fmtInt(w.total)}</div>` +
-        `<div class="week-bar${isBest ? ' best' : ''}${isCurrent ? ' current' : ''}" style="height:${heightPct}%"></div>` +
-        `<div class="week-bar-label${isCurrent ? ' current' : ''}">${isCurrent ? 'esta semana' : label}</div>`;
-      chartEl.appendChild(col);
-    });
-
-    // insight: última semana completa foi a mais fraca do período?
-    const completedWeeks = weekTotals.slice(0, -1);
-    if (completedWeeks.length >= 3) {
-      const lastCompleted = completedWeeks[completedWeeks.length - 1];
-      const minCompleted = Math.min(...completedWeeks.map(w => w.total));
-      if (lastCompleted.total === minCompleted && minCompleted > 0) {
-        const endDate = new Date(lastCompleted.monday); endDate.setDate(endDate.getDate() + 6);
-        insights.push({ level: "warn", text:
-          `Semana de ${lastCompleted.monday.getDate()}/${lastCompleted.monday.getMonth()+1}–` +
-          `${endDate.getDate()}/${endDate.getMonth()+1} teve o menor volume de notas das últimas semanas.` });
-      }
-    }
+    function mondayOf(d){ const x=new Date(d); x.setHours(0,0,0,0); const day=(x.getDay()+6)%7; x.setDate(x.getDate()-day); return x; }
+    const thisMonday=mondayOf(anchor), WEEKS=6, weekTotals=[];
+    for(let i=WEEKS-1;i>=0;i--){ const m=new Date(thisMonday); m.setDate(m.getDate()-i*7); weekTotals.push({monday:m,total:0}); }
+    for(const x of entries){ const wm=mondayOf(x.date).getTime(); const bucket=weekTotals.find(w=>w.monday.getTime()===wm); if(bucket)bucket.total+=x.value; }
+    const chartEl=document.getElementById("week-chart"); const maxTotal=Math.max(1,...weekTotals.map(w=>w.total)); const bestTotal=Math.max(...weekTotals.map(w=>w.total)); chartEl.innerHTML="";
+    weekTotals.forEach((w,idx)=>{ const isCurrent=idx===weekTotals.length-1,isBest=w.total===bestTotal&&bestTotal>0,heightPct=Math.max(6,(w.total/maxTotal)*100); const endDate=new Date(w.monday);endDate.setDate(endDate.getDate()+6); const label=w.monday.getDate()+"/"+(w.monday.getMonth()+1)+"–"+endDate.getDate()+"/"+(endDate.getMonth()+1); const col=document.createElement("div");col.className="week-bar-col";col.innerHTML=`<div class="week-bar-value${isBest?' best':''}">${fmtInt(w.total)}</div><div class="week-bar${isBest?' best':''}${isCurrent?' current':''}" style="height:${heightPct}%"></div><div class="week-bar-label${isCurrent?' current':''}">${isCurrent?'última semana':label}</div>`;chartEl.appendChild(col); });
   } catch(e){ console.error("Faturamento:", e); setDot("dot-fat","alert"); anyError = true; }
 
   await new Promise(r => setTimeout(r, 200));
-  // -------- Inadimplência: quatro abas dedicadas, leitura inteligente --------
+  // -------- Inadimplência: estruturas confirmadas pelos prints --------
   try {
-    const [p24,p25,p26,p26Atual] = await Promise.all([
-      fetchSmartTab(TABS.inad24), fetchSmartTab(TABS.inad25YTD),
-      fetchSmartTab(TABS.inad26YTD), fetchSmartTab(TABS.inad26Atual)
+    const [p24,p25,p26,pHist] = await Promise.all([
+      fetchSmartTab(TABS.inad24), fetchSmartTab(TABS.inad25YTD), fetchSmartTab(TABS.inad26YTD), fetchSmartTab(TABS.inad26Atual)
     ]);
-    const v24=sumRowsSmart(p24), v25=sumRowsSmart(p25), v26=sumRowsSmart(p26), v26Atual=sumRowsSmart(p26Atual);
+    // Abas: A=data, B=valor. Nas abas YTD a data pode estar vazia; por isso somamos B diretamente.
+    const v24=sumExact(p24, exactCol(p24,[['valor']],1), exactCol(p24,[['data']],0), 2024);
+    const v25=sumExact(p25, exactCol(p25,[['valor']],1));
+    const v26=sumExact(p26, exactCol(p26,[['valor']],1));
+    const v26Atual=sumExact(pHist, exactCol(pHist,[['valor']],1), exactCol(pHist,[['data']],0), 2026);
     setText("inad-2024",fmtBRL(v24),!isFinite(v24));
     setText("inad-2025",fmtBRL(v25),!isFinite(v25));
     setText("inad-2026",fmtBRL(v26),!isFinite(v26));
     setText("inad-2026-atual",fmtBRL(v26Atual),!isFinite(v26Atual));
-    const vals=[v24,v25,v26].filter(isFinite);
-    setText("inad-total",fmtBRL(vals.reduce((a,b)=>a+b,0)),!vals.length);
+    const hist=[v24,v25,v26].filter(isFinite); const totalHist=hist.reduce((a,b)=>a+b,0);
+    setText("inad-total",fmtBRL(totalHist),!hist.length);
     const d25=pctChange(v25,v24), d26=pctChange(v26,v25);
     setCompare("inad-var-25","2025 × 2024",d25,true);
     setCompare("inad-var-26","2026 × 2025",d26,true);
-    setDot("dot-inad", isFinite(d26) ? (d26<=0?"ok":"warn") : (vals.length?"ok":"idle"));
-    if(isFinite(d26) && d26>0) insights.push({level:"alert",text:`Inadimplência 2026 está ${fmtPct(d26)} acima do mesmo período de 2025.`});
-    else if(isFinite(d26) && d26<0) insights.push({level:"ok",text:`Inadimplência 2026 está ${fmtPct(Math.abs(d26))} abaixo do mesmo período de 2025.`});
+    setDot("dot-inad",isFinite(d26)?(d26<=0?"ok":"warn"):(hist.length?"ok":"idle"));
+    if(isFinite(d26)&&d26<0) insights.push({level:"ok",text:`Inadimplência jan–período de 2026 está ${fmtPct(Math.abs(d26))} abaixo de 2025.`});
+    else if(isFinite(d26)&&d26>0) insights.push({level:"alert",text:`Inadimplência jan–período de 2026 está ${fmtPct(d26)} acima de 2025.`});
   } catch(e){ console.error("Inadimplência:",e); setDot("dot-inad","alert"); anyError=true; }
 
-  // -------- Assistência técnica: médias anuais + último mês disponível --------
+  // -------- Assistência técnica: A=data | B=Valores gastos | C=percentual --------
   try {
     const pack=await fetchSmartTab(TABS.assist);
-    const series=seriesFromTab(pack,[['percentual'],['porcentagem'],['indice'],['%']]);
+    const dc=exactCol(pack,[['data']],0), pc=exactCol(pack,[['percentual']],2);
+    const series=exactSeries(pack,dc,pc);
     const a24=avgYear(series,2024),a25=avgYear(series,2025),a26=avgYear(series,2026);
     const pair=latestAvailablePair(series,new Date()), cur=pair.cur?.value, prev=pair.prev?.value;
-    setText("assist-2024",fmtPct(a24),!isFinite(a24));
-    setText("assist-2025",fmtPct(a25),!isFinite(a25));
-    setText("assist-2026",fmtPct(a26),!isFinite(a26));
-    setText("assist-cur",isFinite(cur)?fmtPct(cur):"sem dados",!isFinite(cur));
-    setText("assist-prev",isFinite(prev)?fmtPct(prev):"sem dados",!isFinite(prev));
+    setText("assist-2024",fmtPct(a24),!isFinite(a24)); setText("assist-2025",fmtPct(a25),!isFinite(a25)); setText("assist-2026",fmtPct(a26),!isFinite(a26));
+    setText("assist-cur",isFinite(cur)?fmtPct(cur):"sem dados",!isFinite(cur)); setText("assist-prev",isFinite(prev)?fmtPct(prev):"sem dados",!isFinite(prev));
+    if(pair.cur) document.getElementById('assist-cur-label').textContent=`Último mês · ${monthNameShort(pair.cur.date)}`;
+    if(pair.prev) document.getElementById('assist-prev-label').textContent=`Anterior · ${monthNameShort(pair.prev.date)}`;
     const d=pctChange(cur,prev); setCompare("assist-var","Último mês × anterior",d,true);
     setDot("dot-assist",series.length?(isFinite(d)?(d<=0?"ok":"warn"):"ok"):"idle");
   } catch(e){console.error("Assistência:",e);setDot("dot-assist","alert");anyError=true;}
 
-  // -------- Fretes: médias 2025/2026 + último mês disponível --------
+  // -------- Fretes: A=data | B=Valores gastos | C=valor nf | D=percentual --------
   try {
     const pack=await fetchSmartTab(TABS.fretes);
-    const series=seriesFromTab(pack,[['percentual'],['porcentagem'],['frete','%'],['indice']]);
+    const dc=exactCol(pack,[['data']],0), pc=exactCol(pack,[['percentual']],3);
+    const series=exactSeries(pack,dc,pc);
     const a25=avgYear(series,2025),a26=avgYear(series,2026),pair=latestAvailablePair(series,new Date());
-    const prev=pair.prev?.value;
-    setText("fretes-2025",fmtPct(a25),!isFinite(a25));
-    setText("fretes-2026",fmtPct(a26),!isFinite(a26));
-    setText("fretes-prev",isFinite(prev)?fmtPct(prev):"sem dados",!isFinite(prev));
+    const cur=pair.cur?.value, prev=pair.prev?.value;
+    setText("fretes-2025",fmtPct(a25),!isFinite(a25)); setText("fretes-2026",fmtPct(a26),!isFinite(a26));
+    setText("fretes-cur",isFinite(cur)?fmtPct(cur):"sem dados",!isFinite(cur)); setText("fretes-prev",isFinite(prev)?fmtPct(prev):"sem dados",!isFinite(prev));
+    if(pair.cur) document.getElementById('fretes-cur-label').textContent=`Último mês · ${monthNameShort(pair.cur.date)}`;
+    if(pair.prev) document.getElementById('fretes-prev-label').textContent=`Anterior · ${monthNameShort(pair.prev.date)}`;
     const d=pctChange(a26,a25); setCompare("fretes-var","Média 2026 × 2025",d,true);
     setDot("dot-fretes",series.length?(isFinite(d)?(d<=0?"ok":"warn"):"ok"):"idle");
   } catch(e){console.error("Fretes:",e);setDot("dot-fretes","alert");anyError=true;}
 
-  // -------- Verba MKT / Bonificações: ano + dois últimos meses com dados --------
+  // -------- Verba MKT: A=data | B=valores gastos | C=situação --------
   try {
     const pack=await fetchSmartTab(TABS.verba);
-    const dc=detectDateCol(pack.allRows);
-    const vc=detectNumericCol(pack.allRows,[['valor'],['verba'],['total']],dc>=0?[dc]:[]);
-    const tc=detectTextCol(pack.allRows,[['tipo'],['situacao'],['categoria']]);
-    const now=new Date(); let mktAno=0,bonifAno=0,valid=0; const monthly=new Map();
-    for(const r of pack.rows){
-      const d=dc>=0?parseFlexibleDate(r[dc]):null, v=vc>=0?parseBRNumber(r[vc]):NaN;
-      const tipo=tc>=0?String(r[tc]||'').toUpperCase():'';
-      if(!d||!isFinite(v)) continue; valid++;
-      if(d.getFullYear()===now.getFullYear()){
-        if(tipo.includes('BONIF')) bonifAno+=v;
-        else if(tipo.includes('MKT')||tipo.includes('MARKET')) mktAno+=v;
-      }
-      const k=monthKey(d); monthly.set(k,(monthly.get(k)||0)+v);
-    }
-    const monthEntries=[...monthly.entries()].sort((a,b)=>a[0]-b[0]);
-    const curE=monthEntries.length?monthEntries[monthEntries.length-1]:null;
-    const prevE=monthEntries.length>1?monthEntries[monthEntries.length-2]:null;
-    const mes=curE?curE[1]:NaN, prev=prevE?prevE[1]:NaN, totalAno=mktAno+bonifAno;
-    setText("verba-total",fmtBRL(totalAno),!valid);
-    setText("verba-mkt",fmtBRL(mktAno),!valid);
-    setText("verba-bonif",fmtBRL(bonifAno),!valid);
-    setText("verba-mes",fmtBRL(mes),!isFinite(mes));
-    setText("verba-prev",fmtBRL(prev),!isFinite(prev));
-    const d=pctChange(mes,prev); setCompare("verba-var","Último mês × anterior",d,true);
-    setDot("dot-verba",valid?"ok":"idle");
+    const dc=exactCol(pack,[['data']],0), vc=exactCol(pack,[['valores','gastos'],['valor']],1), tc=exactCol(pack,[['situacao'],['tipo']],2);
+    const rows=[];
+    for(const r of pack.rows){const d=parseFlexibleDate(r[dc]),v=parseBRNumber(r[vc]),tipo=String(r[tc]||'').toUpperCase(); if(d&&isFinite(v))rows.push({date:d,value:v,tipo});}
+    rows.sort((a,b)=>a.date-b.date);
+    const latestYear=rows.length?rows[rows.length-1].date.getFullYear():new Date().getFullYear();
+    let mktAno=0,bonifAno=0; const monthly=new Map();
+    for(const x of rows){ if(x.date.getFullYear()===latestYear){ if(x.tipo.includes('BONIF'))bonifAno+=x.value; else if(x.tipo.includes('MKT')||x.tipo.includes('VERBA'))mktAno+=x.value; const k=monthKey(x.date); monthly.set(k,(monthly.get(k)||0)+x.value); } }
+    const months=[...monthly.entries()].sort((a,b)=>a[0]-b[0]); const curE=months.at(-1),prevE=months.at(-2); const mes=curE?.[1],prev=prevE?.[1];
+    const curDate=curE?new Date(Math.floor(curE[0]/12),curE[0]%12,1):null, prevDate=prevE?new Date(Math.floor(prevE[0]/12),prevE[0]%12,1):null;
+    setText("verba-total",fmtBRL(mktAno+bonifAno),!rows.length); setText("verba-mkt",fmtBRL(mktAno),!rows.length); setText("verba-bonif",fmtBRL(bonifAno),!rows.length);
+    setText("verba-mes",fmtBRL(mes),!isFinite(mes)); setText("verba-prev",fmtBRL(prev),!isFinite(prev));
+    if(curDate) document.getElementById('verba-mes-label').textContent=`Último mês · ${monthNameShort(curDate)}`;
+    if(prevDate) document.getElementById('verba-prev-label').textContent=`Anterior · ${monthNameShort(prevDate)}`;
+    const d=pctChange(mes,prev); setCompare("verba-var","Último mês × anterior",d,false); setDot("dot-verba",rows.length?"ok":"idle");
   } catch(e){console.error("Verba MKT:",e);setDot("dot-verba","alert");anyError=true;}
 
-  // -------- Evolução do faturamento: variações percentuais usando último mês disponível --------
+  // -------- Evolução do faturamento: A=data | B=faturamento --------
   try {
     const pack=await fetchSmartTab(TABS.cresc);
-    const series=seriesFromTab(pack,[['faturamento'],['valor'],['total']]);
-    const pair=latestAvailablePair(series,new Date()), curObj=pair.cur, prevObj=pair.prev;
-    const cur=curObj?.value, prev=prevObj?.value;
-    let yoy=NaN, ytdCur=0, ytdPrev=0;
-    if(curObj){
-      const targetYear=curObj.date.getFullYear()-1, targetMonth=curObj.date.getMonth();
-      yoy=monthValue(series,targetYear,targetMonth);
-      const maxMonth=curObj.date.getMonth();
-      ytdCur=series.filter(x=>x.date.getFullYear()===curObj.date.getFullYear()&&x.date.getMonth()<=maxMonth).reduce((a,x)=>a+x.value,0);
-      ytdPrev=series.filter(x=>x.date.getFullYear()===targetYear&&x.date.getMonth()<=maxMonth).reduce((a,x)=>a+x.value,0);
-    }
-    const mom=pctChange(cur,prev), yy=pctChange(cur,yoy), ytd=pctChange(ytdCur,ytdPrev);
-
-    function setEvolutionValue(id, value, isHero){
-      const el=document.getElementById(id);
-      if(!el) return;
-      el.classList.remove("idle","positive","negative");
-      if(!isFinite(value)){ el.textContent="sem dados"; el.classList.add("idle"); return; }
-      const arrow=value>0?"↑ ":value<0?"↓ ":"";
-      el.textContent=arrow+fmtPct(Math.abs(value));
-      el.classList.add(value<0?"negative":"positive");
-    }
-
-    // Destaques principais: mês contra mês anterior e ano acumulado contra ano anterior.
-    setEvolutionValue("cresc-mes-destaque",mom,true);
-    setEvolutionValue("cresc-ano-destaque",ytd,true);
-
-    // Comparações auxiliares ficam abaixo, em formato mais compacto.
-    setEvolutionValue("cresc-mom",mom,false);
-    setEvolutionValue("cresc-yoy",yy,false);
-    setEvolutionValue("cresc-ytd",ytd,false);
-    const vals=[mom,yy,ytd].filter(isFinite), avg=vals.length?vals.reduce((a,v)=>a+v,0)/vals.length:NaN;
-    setCompare("cresc-resumo","Variação média",avg,false);
-    setDot("dot-cresc",vals.length?(avg>=0?"ok":"warn"):"idle");
-    if(isFinite(ytd)&&ytd<0) insights.push({level:"warn",text:`Faturamento acumulado varia ${fmtPct(Math.abs(ytd))} abaixo do mesmo período do ano anterior.`});
+    const dc=exactCol(pack,[['data']],0), vc=exactCol(pack,[['faturamento']],1);
+    const series=exactSeries(pack,dc,vc), pair=latestAvailablePair(series,new Date()), curObj=pair.cur, prevObj=pair.prev;
+    const cur=curObj?.value, prev=prevObj?.value; let jan=NaN;
+    if(curObj){ const j=series.find(x=>x.date.getFullYear()===curObj.date.getFullYear()&&x.date.getMonth()===0); jan=j?.value; }
+    const yearSeries=curObj?series.filter(x=>x.date.getFullYear()===curObj.date.getFullYear()&&x.date<=curObj.date):[];
+    const avgYearValue=yearSeries.length?average(yearSeries.map(x=>x.value)):NaN;
+    const changes=[]; for(let i=1;i<yearSeries.length;i++){const p=pctChange(yearSeries[i].value,yearSeries[i-1].value);if(isFinite(p))changes.push(p);}
+    const mom=pctChange(cur,prev), year=pctChange(cur,jan), vsAvg=pctChange(cur,avgYearValue), avgChange=average(changes);
+    function setEvolutionValue(id,value){const el=document.getElementById(id);if(!el)return;el.classList.remove('idle','positive','negative');if(!isFinite(value)){el.textContent='sem dados';el.classList.add('idle');return;}const arrow=value>0?'↑ ':value<0?'↓ ':'';el.textContent=arrow+fmtPct(Math.abs(value));el.classList.add(value<0?'negative':'positive');}
+    setEvolutionValue("cresc-mes-destaque",mom); setEvolutionValue("cresc-ano-destaque",year);
+    setEvolutionValue("cresc-mom",mom); setEvolutionValue("cresc-yoy",vsAvg); setEvolutionValue("cresc-ytd",avgChange);
+    setCompare("cresc-resumo","Último mês × janeiro",year,false);
+    const vals=[mom,year,vsAvg,avgChange].filter(isFinite),avg=average(vals); setDot("dot-cresc",vals.length?(avg>=0?"ok":"warn"):"idle");
+    if(isFinite(mom)&&mom<0) insights.push({level:"warn",text:`Faturamento do último mês caiu ${fmtPct(Math.abs(mom))} frente ao mês anterior.`});
   } catch(e){console.error("Evolução do faturamento:",e);setDot("dot-cresc","alert");anyError=true;}
 
-  // -------- Itens faltantes: leitura flexível --------
+  // -------- Itens faltantes: A=data | B=porcentagem --------
   try {
-    const pack=await fetchSmartTab(TABS.itens);
-    const series=seriesFromTab(pack,[['porcentagem'],['percentual'],['indice'],['%']]);
-    const pair=latestAvailablePair(series,new Date());
-    const atual=pair.cur?.value;
-    const media=series.length?series.reduce((s,x)=>s+x.value,0)/series.length:NaN;
-    setText("itens-atual",isFinite(atual)?fmtPct(atual):"sem dados",!isFinite(atual));
-    setText("itens-media",isFinite(media)?fmtPct(media):"sem dados",!isFinite(media));
-    setDot("dot-itens",series.length?"ok":"idle");
-    if(!series.length) insights.push({level:"warn",text:"A aba de Itens Faltantes não retornou uma série percentual reconhecível."});
+    const pack=await fetchSmartTab(TABS.itens); const dc=exactCol(pack,[['data']],0),pc=exactCol(pack,[['porcentagem']],1); const series=exactSeries(pack,dc,pc);
+    const pair=latestAvailablePair(series,new Date()),atual=pair.cur?.value,media=series.length?average(series.map(x=>x.value)):NaN;
+    setText("itens-atual",isFinite(atual)?fmtPct(atual):"sem dados",!isFinite(atual)); setText("itens-media",isFinite(media)?fmtPct(media):"sem dados",!isFinite(media)); setDot("dot-itens",series.length?"ok":"idle");
+    if(!series.length) insights.push({level:"warn",text:"A aba de Itens Faltantes possui apenas os cabeçalhos e ainda não tem lançamentos."});
   } catch(e){console.error("Itens faltantes:",e);setDot("dot-itens","alert");anyError=true;}
 
   renderInsights(insights);
@@ -910,6 +1023,70 @@ async function loadAll(){
     new Date().toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
   loadingAll=false;
 }
+
+
+
+/* ===== ÍCONES DE INFORMAÇÃO ===== */
+(function(){
+  const overlay=document.getElementById('infoOverlay'), title=document.getElementById('infoTitle'), body=document.getElementById('infoBody'), close=document.getElementById('infoClose');
+  if(!overlay) return;
+  const infos=[
+    ['#fat .pill-title','Faturamento — Notas Emitidas','Lê a aba <strong>NFs Faturadas</strong>. Soma a coluna <strong>quantidade</strong> por data. O número principal mostra o mês atual; se o mês atual ainda não tiver lançamento, mostra automaticamente o último mês disponível. O gráfico compara as seis últimas semanas com dados.'],
+    ['#fat-label','Total mensal de NFs','Soma todas as quantidades da aba NFs Faturadas pertencentes ao mês indicado no próprio rótulo.'],
+    ['#inad .pill-title','Inadimplência','Combina quatro abas específicas: Inadimplência 2024, jan-2025 até dias atuais, jan2026 até dias atuais e Inadimplência 2026. Cada indicador usa sua própria fonte para evitar misturar períodos.'],
+    ['#inad .stat:nth-child(1) .stat-label','Total 2024','Soma somente os lançamentos de 2024 da aba <strong>Inadimplência 2024</strong>.'],
+    ['#inad .stat:nth-child(2) .stat-label','2025 · jan até hoje','Valor da aba <strong>jan-2025 até dias atuais</strong>. É usado como base comparável com 2026.'],
+    ['#inad .stat:nth-child(3) .stat-label','2026 · jan até hoje','Valor da aba <strong>jan2026 até dias atuais</strong>. A variação 2026 × 2025 compara este número com o indicador de 2025.'],
+    ['#inad .stat:nth-child(4) .stat-label','Inadimplência 2026','Soma apenas as linhas de 2026 da aba histórica <strong>Inadimplência 2026</strong>. Não inclui 2024 ou 2025 nessa soma.'],
+    ['#inad .stat:nth-child(5) .stat-label','Total histórico','Soma <strong>Total 2024 + Jan/2025 até hoje + Jan/2026 até hoje</strong>. O indicador “Inadimplência 2026” não entra novamente para evitar dupla contagem.'],
+    ['#cresc .pill-title','Evolução do Faturamento','Lê a aba <strong>Crescimento</strong> (data + faturamento). Os dois números grandes são variações percentuais, não valores em reais.'],
+    ['#cresc .evolucao-main:nth-child(1) .evolucao-label','Mês','Variação percentual do último mês disponível contra o mês imediatamente anterior. <span class="formula">(último mês − mês anterior) ÷ mês anterior × 100</span>'],
+    ['#cresc .evolucao-main:nth-child(3) .evolucao-label','Ano','Evolução do faturamento do último mês disponível em relação a janeiro do mesmo ano. <span class="formula">(último mês − janeiro) ÷ janeiro × 100</span>'],
+    ['#verba .pill-title','Verba MKT & Bonificações','Lê a aba <strong>Verba Marke</strong>. Separa os lançamentos pela coluna situação: VERBA MKT e BONIFICAÇÃO. Os totais anuais consideram o ano mais recente encontrado na planilha.'],
+    ['#verba .stat:nth-child(1) .stat-label','Total do ano','Soma Marketing + Bonificações do ano mais recente disponível.'],
+    ['#verba .stat:nth-child(4) .stat-label','Último mês','Soma todos os lançamentos de Marketing e Bonificação do último mês disponível.'],
+    ['#fretes .pill-title, .strip .card:nth-child(1) .pill-title','Fretes','Lê a aba <strong>Fretes</strong>. Usa a coluna percentual (coluna D nos dados enviados) e calcula médias simples por ano, além dos dois últimos meses disponíveis.'],
+    ['#assist .pill-title, .strip .card:nth-child(2) .pill-title','Assistência Técnica','Lê a aba <strong>Assit Tecnica</strong>. Usa a coluna percentual (coluna C nos dados enviados). Média anual = média dos percentuais mensais daquele ano.'],
+    ['.strip .card:nth-child(3) .pill-title','% Itens Faltantes','Lê a aba <strong>Itens Faltantes</strong>. No material enviado ela contém somente os cabeçalhos data e porcentagem, sem lançamentos; por isso o painel mostra “sem dados” até a planilha receber valores.'],
+    ['#insights .pill-title','Pontos de Atenção','Mostra alertas gerados automaticamente a partir dos indicadores: queda de faturamento, ausência de dados e mudanças relevantes entre períodos.']
+  ];
+  function openInfo(t,h){ title.textContent=t; body.innerHTML=h; overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+  function addInfo(selector,t,h){ document.querySelectorAll(selector).forEach(el=>{ if(el.querySelector(':scope > .info-btn'))return; const b=document.createElement('button');b.type='button';b.className='info-btn';b.textContent='i';b.setAttribute('aria-label','Explicar '+t);b.addEventListener('click',e=>{e.stopPropagation();openInfo(t,h);});el.appendChild(b); }); }
+  infos.forEach(x=>addInfo(x[0],x[1],x[2]));
+  close.addEventListener('click',()=>{overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');});
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close.click();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))close.click();});
+})();
+
+/* ===== TELA CHEIA / MODO TV ===== */
+(function(){
+  const btn = document.getElementById('fullscreenBtn');
+  if (!btn) return;
+  const root = document.documentElement;
+  function isFullscreen(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function syncButton(){
+    btn.setAttribute('aria-pressed', isFullscreen() ? 'true' : 'false');
+    btn.title = isFullscreen() ? 'Sair da tela cheia' : 'Abrir painel em tela cheia';
+  }
+  async function toggleFullscreen(){
+    try{
+      if (!isFullscreen()){
+        if (root.requestFullscreen) await root.requestFullscreen();
+        else if (root.webkitRequestFullscreen) root.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) await document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }catch(err){
+      console.warn('Tela cheia não pôde ser ativada:', err);
+    }
+    syncButton();
+  }
+  btn.addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', syncButton);
+  document.addEventListener('webkitfullscreenchange', syncButton);
+  syncButton();
+})();
 
 function tick(){
   const now = new Date();
