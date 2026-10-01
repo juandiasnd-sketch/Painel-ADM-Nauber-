@@ -431,6 +431,79 @@
   .info-body .formula{ display:block; margin-top:10px; padding:10px 12px; border-radius:10px; background:#2b2e36; color:#e8eaf0; font-size:13px; }
   @media (max-height:820px){ .info-btn{ width:14px;height:14px;min-width:14px;font-size:9px;line-height:12px;margin-left:4px; } }
 
+
+  /* ===== AJUSTE V6: MAIS CONTEÚDO VISÍVEL NA TV ===== */
+  body{ height:100dvh; }
+  main{
+    grid-template-rows:minmax(0,1.03fr) minmax(0,.78fr) minmax(0,.76fr);
+    gap:clamp(7px,.72vw,12px);
+    padding:clamp(7px,.9vh,12px) clamp(10px,1.25vw,22px);
+  }
+  .card{ padding:clamp(9px,.92vw,15px); border-radius:12px; }
+  .pill-title{
+    margin-bottom:clamp(5px,.72vh,9px);
+    padding:clamp(5px,.58vh,7px) clamp(12px,1vw,18px);
+    font-size:clamp(12px,.88vw,16px);
+  }
+  .stat-grid{ gap:clamp(5px,.52vw,8px); }
+  .stat-label{ font-size:clamp(8.5px,.61vw,11px); margin-bottom:3px; line-height:1.12; }
+  .stat-chip{ padding:clamp(5px,.58vh,8px) 5px; }
+  .stat-value{ font-size:clamp(13px,1.05vw,19px); }
+  .compare-row{ margin-top:4px; gap:4px; }
+  .compare-pill{ font-size:clamp(8px,.54vw,10px); padding:2px 6px; }
+  .insights-list{ gap:5px; }
+  .insight-item{ font-size:clamp(9px,.7vw,12px); line-height:1.26; }
+  .fat-top .amount{ font-size:clamp(30px,3.25vw,54px); }
+  .fat-top .amount-label{ font-size:clamp(10px,.78vw,13px); }
+  .fat-today{ margin-top:3px; padding:3px 10px; }
+  .week-chart-wrap{ margin-top:5px; }
+  .week-chart-title{ margin-bottom:3px; font-size:clamp(8px,.58vw,10px); }
+  .week-bar-value{ margin-bottom:2px; font-size:clamp(9px,.68vw,12px); }
+  .week-bar-label{ margin-top:2px; font-size:clamp(8px,.56vw,10px); }
+
+  /* Valores em R$ do faturamento precisam ser grandes, mas caber em 1 linha. */
+  .evolucao-hero{ padding:6px 8px; margin-bottom:5px; gap:8px; }
+  .evolucao-label{ font-size:clamp(12px,.85vw,16px); }
+  .evolucao-value.amount{ font-size:clamp(22px,1.75vw,32px); letter-spacing:-.015em; }
+  .evolucao-caption{ font-size:clamp(7.5px,.52vw,9.5px); margin-top:2px; }
+  .evolucao-comparativos{ gap:5px; }
+  .evolucao-mini{ padding:4px 4px; }
+  .evolucao-mini span{ min-height:16px; font-size:clamp(7.5px,.5vw,9px); }
+  .evolucao-mini strong{ margin-top:1px; font-size:clamp(11px,.82vw,15px); }
+
+  header{ padding:7px clamp(10px,1.25vw,22px); min-height:50px; }
+  header .logo{ height:clamp(23px,2.8vh,34px); }
+  .h-title .label{ font-size:clamp(14px,1.28vw,20px); }
+  .h-title .sub{ font-size:clamp(9px,.62vw,11px); }
+  .clock{ font-size:clamp(20px,2vw,29px); }
+  .clock .date{ font-size:clamp(8px,.55vw,10px); }
+  .fullscreen-btn{ padding:6px 8px; font-size:10px; }
+  footer{ padding:0 clamp(10px,1.25vw,22px) 4px; font-size:9px; min-height:20px; }
+  .legend{ gap:10px; }
+
+  @media (min-width:1200px) and (max-height:820px){
+    main{ grid-template-rows:minmax(0,1fr) minmax(0,.72fr) minmax(0,.72fr); gap:6px; padding:6px 9px; }
+    header{ padding:5px 9px; min-height:44px; }
+    footer{ min-height:16px; padding:0 9px 2px; }
+    .card{ padding:7px 8px; border-radius:10px; }
+    .pill-title{ margin-bottom:4px; padding:4px 11px; font-size:12px; }
+    .stat-label{ font-size:8px; margin-bottom:2px; }
+    .stat-chip{ padding:4px; }
+    .stat-value{ font-size:12px; }
+    .compare-pill{ font-size:7.5px; padding:1px 5px; }
+    .evolucao-value.amount{ font-size:clamp(18px,1.55vw,27px); }
+    .evolucao-hero{ padding:4px 6px; margin-bottom:4px; }
+    .evolucao-mini{ padding:3px; }
+    .evolucao-mini span{ min-height:14px; font-size:7px; }
+    .evolucao-mini strong{ font-size:11px; }
+    .insight-item{ font-size:9px; }
+  }
+
+  @media (min-width:1600px) and (min-height:900px){
+    .evolucao-value.amount{ font-size:clamp(28px,1.72vw,36px); }
+    .stat-label{ font-size:clamp(9px,.58vw,11px); }
+    .stat-value{ font-size:clamp(14px,.95vw,19px); }
+  }
 </style>
 </head>
 <body>
@@ -486,15 +559,15 @@
       <div class="pill-title"><span class="status idle" id="dot-cresc"></span>Evolução do Faturamento</div>
       <div class="evolucao-hero">
         <div class="evolucao-main">
-          <div class="evolucao-label">Mês</div>
-          <div class="evolucao-value idle" id="cresc-mes-destaque">—</div>
-          <div class="evolucao-caption">vs. mês anterior</div>
+          <div class="evolucao-label" id="cresc-mes-label">Mês</div>
+          <div class="evolucao-value amount idle" id="cresc-mes-destaque">—</div>
+          <div class="evolucao-caption" id="cresc-mes-caption">faturamento do mês</div>
         </div>
         <div class="evolucao-divider"></div>
         <div class="evolucao-main">
-          <div class="evolucao-label">Ano</div>
-          <div class="evolucao-value idle" id="cresc-ano-destaque">—</div>
-          <div class="evolucao-caption">último mês vs. janeiro</div>
+          <div class="evolucao-label" id="cresc-ano-label">Ano</div>
+          <div class="evolucao-value amount idle" id="cresc-ano-destaque">—</div>
+          <div class="evolucao-caption" id="cresc-ano-caption">jan/2026 até hoje</div>
         </div>
       </div>
       <div class="evolucao-comparativos">
@@ -502,7 +575,7 @@
         <div class="evolucao-mini"><span>Mês × média do ano</span><strong id="cresc-yoy">—</strong></div>
         <div class="evolucao-mini"><span>Média das variações mensais</span><strong id="cresc-ytd">—</strong></div>
       </div>
-      <div class="compare-row"><span class="compare-pill" id="cresc-resumo">comparativo de variação</span></div>
+      <div class="compare-row"><span class="compare-pill" id="cresc-resumo">comparativos percentuais</span></div>
     </div>
 
     <div class="card" id="verba">
@@ -992,20 +1065,75 @@ async function loadAll(){
   try {
     const pack=await fetchSmartTab(TABS.cresc);
     const dc=exactCol(pack,[['data']],0), vc=exactCol(pack,[['faturamento']],1);
-    const series=exactSeries(pack,dc,vc), pair=latestAvailablePair(series,new Date()), curObj=pair.cur, prevObj=pair.prev;
-    const cur=curObj?.value, prev=prevObj?.value; let jan=NaN;
-    if(curObj){ const j=series.find(x=>x.date.getFullYear()===curObj.date.getFullYear()&&x.date.getMonth()===0); jan=j?.value; }
-    const yearSeries=curObj?series.filter(x=>x.date.getFullYear()===curObj.date.getFullYear()&&x.date<=curObj.date):[];
-    const avgYearValue=yearSeries.length?average(yearSeries.map(x=>x.value)):NaN;
-    const changes=[]; for(let i=1;i<yearSeries.length;i++){const p=pctChange(yearSeries[i].value,yearSeries[i-1].value);if(isFinite(p))changes.push(p);}
-    const mom=pctChange(cur,prev), year=pctChange(cur,jan), vsAvg=pctChange(cur,avgYearValue), avgChange=average(changes);
-    function setEvolutionValue(id,value){const el=document.getElementById(id);if(!el)return;el.classList.remove('idle','positive','negative');if(!isFinite(value)){el.textContent='sem dados';el.classList.add('idle');return;}const arrow=value>0?'↑ ':value<0?'↓ ':'';el.textContent=arrow+fmtPct(Math.abs(value));el.classList.add(value<0?'negative':'positive');}
-    setEvolutionValue("cresc-mes-destaque",mom); setEvolutionValue("cresc-ano-destaque",year);
-    setEvolutionValue("cresc-mom",mom); setEvolutionValue("cresc-yoy",vsAvg); setEvolutionValue("cresc-ytd",avgChange);
-    setCompare("cresc-resumo","Último mês × janeiro",year,false);
-    const vals=[mom,year,vsAvg,avgChange].filter(isFinite),avg=average(vals); setDot("dot-cresc",vals.length?(avg>=0?"ok":"warn"):"idle");
-    if(isFinite(mom)&&mom<0) insights.push({level:"warn",text:`Faturamento do último mês caiu ${fmtPct(Math.abs(mom))} frente ao mês anterior.`});
-  } catch(e){console.error("Evolução do faturamento:",e);setDot("dot-cresc","alert");anyError=true;}
+    const series=exactSeries(pack,dc,vc);
+    const now=new Date();
+
+    // Agrupa por mês para evitar duplicidade caso a planilha passe a ter mais de uma linha no mesmo mês.
+    const monthlyMap=new Map();
+    for(const x of series){
+      if(x.date>now) continue;
+      const k=monthKey(x.date);
+      monthlyMap.set(k,(monthlyMap.get(k)||0)+x.value);
+    }
+    const monthly=[...monthlyMap.entries()].sort((a,b)=>a[0]-b[0]).map(([k,value])=>({
+      key:k, value, date:new Date(Math.floor(k/12),k%12,1)
+    }));
+
+    const currentKey=monthKey(new Date(now.getFullYear(),now.getMonth(),1));
+    let curObj=monthly.find(x=>x.key===currentKey) || monthly.at(-1) || null;
+    const prevObj=curObj ? monthly.filter(x=>x.key<curObj.key).at(-1) || null : null;
+    const cur=curObj?.value, prev=prevObj?.value;
+
+    // Total anual = soma de janeiro do ano do mês exibido até o último mês disponível / hoje.
+    const displayYear=curObj ? curObj.date.getFullYear() : now.getFullYear();
+    const ytdSeries=monthly.filter(x=>x.date.getFullYear()===displayYear && x.key<= (curObj?.key ?? currentKey));
+    const yearTotal=ytdSeries.length ? ytdSeries.reduce((sum,x)=>sum+x.value,0) : NaN;
+    const avgYearValue=ytdSeries.length ? average(ytdSeries.map(x=>x.value)) : NaN;
+
+    const changes=[];
+    for(let i=1;i<ytdSeries.length;i++){
+      const p=pctChange(ytdSeries[i].value,ytdSeries[i-1].value);
+      if(isFinite(p)) changes.push(p);
+    }
+    const mom=pctChange(cur,prev), vsAvg=pctChange(cur,avgYearValue), avgChange=average(changes);
+
+    function setEvolutionAmount(id,value){
+      const el=document.getElementById(id); if(!el)return;
+      el.classList.remove('idle','positive','negative');
+      if(!isFinite(value)){ el.textContent='sem dados'; el.classList.add('idle'); return; }
+      el.textContent=fmtBRL(value);
+    }
+    function setEvolutionPercent(id,value){
+      const el=document.getElementById(id); if(!el)return;
+      el.classList.remove('idle','positive','negative');
+      if(!isFinite(value)){ el.textContent='sem dados'; el.classList.add('idle'); return; }
+      const arrow=value>0?'↑ ':value<0?'↓ ':'';
+      el.textContent=arrow+fmtPct(Math.abs(value));
+      el.classList.add(value<0?'negative':'positive');
+    }
+
+    setEvolutionAmount('cresc-mes-destaque',cur);
+    setEvolutionAmount('cresc-ano-destaque',yearTotal);
+    setEvolutionPercent('cresc-mom',mom);
+    setEvolutionPercent('cresc-yoy',vsAvg);
+    setEvolutionPercent('cresc-ytd',avgChange);
+
+    if(curObj){
+      const m=monthNameShort(curObj.date);
+      document.getElementById('cresc-mes-label').textContent=`Mês · ${m}`;
+      document.getElementById('cresc-mes-caption').textContent=curObj.key===currentKey?'faturamento do mês atual':'último mês disponível';
+      document.getElementById('cresc-ano-label').textContent=`Ano · ${displayYear}`;
+      document.getElementById('cresc-ano-caption').textContent=`jan/${displayYear} até ${m}`;
+      document.getElementById('cresc-resumo').textContent=`Acumulado jan–${m}: ${fmtBRL(yearTotal)}`;
+    } else {
+      document.getElementById('cresc-resumo').textContent='sem dados de faturamento';
+    }
+
+    const vals=[mom,vsAvg,avgChange].filter(isFinite);
+    const avg=average(vals);
+    setDot('dot-cresc',monthly.length?(vals.length?(avg>=0?'ok':'warn'):'ok'):'idle');
+    if(isFinite(mom)&&mom<0) insights.push({level:'warn',text:`Faturamento do último mês caiu ${fmtPct(Math.abs(mom))} frente ao mês anterior.`});
+  } catch(e){console.error('Evolução do faturamento:',e);setDot('dot-cresc','alert');anyError=true;}
 
   // -------- Itens faltantes: A=data | B=porcentagem --------
   try {
@@ -1039,9 +1167,9 @@ async function loadAll(){
     ['#inad .stat:nth-child(3) .stat-label','2026 · jan até hoje','Valor da aba <strong>jan2026 até dias atuais</strong>. A variação 2026 × 2025 compara este número com o indicador de 2025.'],
     ['#inad .stat:nth-child(4) .stat-label','Inadimplência 2026','Soma apenas as linhas de 2026 da aba histórica <strong>Inadimplência 2026</strong>. Não inclui 2024 ou 2025 nessa soma.'],
     ['#inad .stat:nth-child(5) .stat-label','Total histórico','Soma <strong>Total 2024 + Jan/2025 até hoje + Jan/2026 até hoje</strong>. O indicador “Inadimplência 2026” não entra novamente para evitar dupla contagem.'],
-    ['#cresc .pill-title','Evolução do Faturamento','Lê a aba <strong>Crescimento</strong> (data + faturamento). Os dois números grandes são variações percentuais, não valores em reais.'],
-    ['#cresc .evolucao-main:nth-child(1) .evolucao-label','Mês','Variação percentual do último mês disponível contra o mês imediatamente anterior. <span class="formula">(último mês − mês anterior) ÷ mês anterior × 100</span>'],
-    ['#cresc .evolucao-main:nth-child(3) .evolucao-label','Ano','Evolução do faturamento do último mês disponível em relação a janeiro do mesmo ano. <span class="formula">(último mês − janeiro) ÷ janeiro × 100</span>'],
+    ['#cresc .pill-title','Evolução do Faturamento','Lê a aba <strong>Crescimento</strong> (data + faturamento). O destaque <strong>Mês</strong> mostra o faturamento do mês atual; se ainda não houver lançamento no mês atual, mostra o último mês disponível. O destaque <strong>Ano</strong> soma de janeiro do mesmo ano até esse mês. As variações percentuais ficam nos quadros menores abaixo.'],
+    ['#cresc .evolucao-main:nth-child(1) .evolucao-label','Mês','Mostra o <strong>valor total faturado no mês</strong>. Se o mês atual ainda não estiver lançado, o rótulo informa qual foi o último mês disponível na planilha.'],
+    ['#cresc .evolucao-main:nth-child(3) .evolucao-label','Ano','Mostra o <strong>faturamento acumulado do ano</strong>, somando janeiro até o mês exibido. Ex.: jan/2026 até set/2026 quando outubro ainda não possui lançamento.'],
     ['#verba .pill-title','Verba MKT & Bonificações','Lê a aba <strong>Verba Marke</strong>. Separa os lançamentos pela coluna situação: VERBA MKT e BONIFICAÇÃO. Os totais anuais consideram o ano mais recente encontrado na planilha.'],
     ['#verba .stat:nth-child(1) .stat-label','Total do ano','Soma Marketing + Bonificações do ano mais recente disponível.'],
     ['#verba .stat:nth-child(4) .stat-label','Último mês','Soma todos os lançamentos de Marketing e Bonificação do último mês disponível.'],
