@@ -204,6 +204,38 @@
   .cresc-delta-row .pill.up{ background: rgba(224,87,74,0.14); color: var(--red); }
   .cresc-delta-row .pill.idle{ background: var(--chip-bg); color: var(--ink-faint); font-weight:500; }
 
+  /* Evolução do faturamento: dois indicadores principais em destaque */
+  #cresc{ justify-content:flex-start; }
+  .evolucao-hero{
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:14px;
+    background:rgba(255,255,255,.015); border:1px solid var(--card-border); border-radius:12px;
+    padding:14px 16px; margin-bottom:12px;
+  }
+  .evolucao-main{ text-align:center; min-width:0; }
+  .evolucao-label{
+    font-family:var(--cond); font-size:clamp(15px,1.25vw,19px); font-weight:700;
+    text-transform:uppercase; letter-spacing:.04em; color:var(--ink-dim); margin-bottom:3px;
+  }
+  .evolucao-value{
+    font-family:var(--cond); font-size:clamp(34px,3.4vw,54px); line-height:1; font-weight:800;
+    color:#8FE3A6; white-space:nowrap;
+  }
+  .evolucao-value.negative{ color:var(--red); }
+  .evolucao-value.idle{ color:var(--ink-faint); }
+  .evolucao-caption{ font-size:clamp(9px,.72vw,11px); color:var(--ink-faint); margin-top:5px; }
+  .evolucao-divider{ width:1px; align-self:stretch; background:var(--card-border); }
+  .evolucao-comparativos{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .evolucao-mini{
+    background:var(--chip-bg); border-radius:9px; padding:8px 7px; text-align:center; min-width:0;
+  }
+  .evolucao-mini span{ display:block; color:var(--ink-faint); font-size:clamp(8px,.66vw,10px); line-height:1.2; min-height:24px; }
+  .evolucao-mini strong{ display:block; margin-top:4px; font-family:var(--cond); font-size:clamp(14px,1.2vw,19px); color:var(--ink); }
+  .evolucao-mini strong.positive{ color:#8FE3A6; }
+  .evolucao-mini strong.negative{ color:var(--red); }
+  @media (max-width:680px){
+    .evolucao-hero{grid-template-columns:1fr;gap:10px}.evolucao-divider{width:100%;height:1px}.evolucao-comparativos{grid-template-columns:1fr}
+  }
+
   .strip{ grid-column: 1 / -1; display:grid; grid-template-columns: repeat(3, 1fr); gap: clamp(14px, 1.6vw, 22px); }
 
   .insights-block{
@@ -306,10 +338,23 @@
 
     <div class="card" id="cresc">
       <div class="pill-title"><span class="status idle" id="dot-cresc"></span>Evolução do Faturamento</div>
-      <div class="stat-grid cols-3">
-        <div class="stat"><div class="stat-label">Mês × mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="cresc-mom">—</span></div></div>
-        <div class="stat"><div class="stat-label">Mês × mesmo mês ano anterior</div><div class="stat-chip"><span class="stat-value idle" id="cresc-yoy">—</span></div></div>
-        <div class="stat"><div class="stat-label">Ano até hoje × ano anterior</div><div class="stat-chip"><span class="stat-value idle" id="cresc-ytd">—</span></div></div>
+      <div class="evolucao-hero">
+        <div class="evolucao-main">
+          <div class="evolucao-label">Mês</div>
+          <div class="evolucao-value idle" id="cresc-mes-destaque">—</div>
+          <div class="evolucao-caption">vs. mês anterior</div>
+        </div>
+        <div class="evolucao-divider"></div>
+        <div class="evolucao-main">
+          <div class="evolucao-label">Ano</div>
+          <div class="evolucao-value idle" id="cresc-ano-destaque">—</div>
+          <div class="evolucao-caption">acumulado vs. ano anterior</div>
+        </div>
+      </div>
+      <div class="evolucao-comparativos">
+        <div class="evolucao-mini"><span>Mês × anterior</span><strong id="cresc-mom">—</strong></div>
+        <div class="evolucao-mini"><span>Mês × mesmo mês ano anterior</span><strong id="cresc-yoy">—</strong></div>
+        <div class="evolucao-mini"><span>Ano até hoje × ano anterior</span><strong id="cresc-ytd">—</strong></div>
       </div>
       <div class="compare-row"><span class="compare-pill" id="cresc-resumo">comparativo de variação</span></div>
     </div>
@@ -502,6 +547,88 @@ async function fetchValidatedTab(tab, requiredHeaderWords, maxAttempts){
   return [];
 }
 
+
+function normText(s){
+  return String(s ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+}
+function headerIndex(header, groups){
+  const cells=(header||[]).map(normText);
+  for(const group of groups){
+    const words=Array.isArray(group)?group:[group];
+    for(let i=0;i<cells.length;i++){
+      if(words.every(w=>cells[i].includes(normText(w)))) return i;
+    }
+  }
+  return -1;
+}
+function looksDate(v){
+  const s=String(v??'').trim();
+  return /^(?:\d{1,2}\/\d{1,2}(?:\/\d{2,4})?|\d{1,2}\/\d{4}|\d{4}-\d{1,2}(?:-\d{1,2})?)/.test(s);
+}
+function parseFlexibleDate(raw){
+  if(!raw) return null;
+  const s=String(raw).trim();
+  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if(m){ let y=+m[3]; if(y<100)y+=2000; return new Date(y,+m[2]-1,+m[1]); }
+  m=s.match(/^(\d{1,2})\/(\d{4})$/);
+  if(m) return new Date(+m[2],+m[1]-1,1);
+  m=s.match(/^(\d{4})-(\d{1,2})(?:-(\d{1,2}))?/);
+  if(m) return new Date(+m[1],+m[2]-1,+(m[3]||1));
+  return null;
+}
+function detectDateCol(allRows){
+  if(!allRows.length) return -1;
+  const h=allRows[0]||[];
+  let i=headerIndex(h, [['data'],['mes'],['competencia'],['periodo']]);
+  if(i>=0) return i;
+  const rows=allRows.slice(1,80), n=Math.max(0,...allRows.map(r=>r.length));
+  let best=-1,bestScore=0;
+  for(let c=0;c<n;c++){ let ok=0,tot=0; for(const r of rows){ const v=r[c]; if(String(v??'').trim()){tot++; if(parseFlexibleDate(v))ok++;} } const sc=tot?ok/tot:0; if(sc>bestScore){bestScore=sc;best=c;} }
+  return bestScore>=0.45?best:-1;
+}
+function detectNumericCol(allRows, headerGroups, exclude=[]){
+  if(!allRows.length) return -1;
+  const h=allRows[0]||[];
+  let i=headerIndex(h, headerGroups);
+  if(i>=0 && !exclude.includes(i)) return i;
+  const rows=allRows.slice(1,120), n=Math.max(0,...allRows.map(r=>r.length));
+  let best=-1,bestScore=0;
+  for(let c=0;c<n;c++){ if(exclude.includes(c)) continue; let ok=0,tot=0; for(const r of rows){const v=String(r[c]??'').trim(); if(!v)continue; tot++; if(isFinite(parseBRNumber(v)))ok++;} const sc=tot?ok/tot:0; if(sc>bestScore){bestScore=sc;best=c;} }
+  return bestScore>=0.45?best:-1;
+}
+function detectTextCol(allRows, headerGroups){
+  if(!allRows.length) return -1;
+  return headerIndex(allRows[0]||[], headerGroups);
+}
+async function fetchSmartTab(tab){
+  const allRows=await fetchTab(tab.gid);
+  if(!allRows || !allRows.length) return {header:[],rows:[],allRows:[]};
+  return {header:allRows[0]||[], rows:allRows.slice(1).filter(r=>r.some(v=>String(v??'').trim()!=='')), allRows};
+}
+function seriesFromTab(pack, valueGroups){
+  const dc=detectDateCol(pack.allRows);
+  const vc=detectNumericCol(pack.allRows,valueGroups,dc>=0?[dc]:[]);
+  const out=[];
+  if(dc<0||vc<0) return out;
+  for(const r of pack.rows){const d=parseFlexibleDate(r[dc]),v=parseBRNumber(r[vc]); if(d&&isFinite(v))out.push({date:d,value:v,row:r});}
+  out.sort((a,b)=>a.date-b.date); return out;
+}
+function monthKey(d){return d.getFullYear()*12+d.getMonth();}
+function monthlyLast(series){
+  const m=new Map(); for(const x of series)m.set(monthKey(x.date),x); return [...m.values()].sort((a,b)=>a.date-b.date);
+}
+function latestAvailablePair(series, ref=new Date()){
+  const months=monthlyLast(series).filter(x=>x.date<=ref);
+  const cur=months.length?months[months.length-1]:null;
+  const prev=months.length>1?months[months.length-2]:null;
+  return {cur,prev};
+}
+function avgYear(series,year){const a=series.filter(x=>x.date.getFullYear()===year);return a.length?a.reduce((s,x)=>s+x.value,0)/a.length:NaN;}
+function sumRowsSmart(pack){
+  const dc=detectDateCol(pack.allRows); const vc=detectNumericCol(pack.allRows,[['valor'],['inadimplencia'],['saldo'],['total']],dc>=0?[dc]:[]);
+  if(vc<0)return NaN; let s=0,n=0; for(const r of pack.rows){const v=parseBRNumber(r[vc]);if(isFinite(v)){s+=v;n++;}} return n?s:NaN;
+}
+
 function sameWeek(a, b){
   const d1 = new Date(a); d1.setHours(0,0,0,0);
   const d2 = new Date(b); d2.setHours(0,0,0,0);
@@ -643,117 +770,137 @@ async function loadAll(){
   } catch(e){ console.error("Faturamento:", e); setDot("dot-fat","alert"); anyError = true; }
 
   await new Promise(r => setTimeout(r, 200));
-  // -------- Inadimplência: quatro abas dedicadas --------
+  // -------- Inadimplência: quatro abas dedicadas, leitura inteligente --------
   try {
-    const [r24,r25,r26,r26Atual] = await Promise.all([
-      fetchValidatedTab(TABS.inad24, ["valor","inad"]),
-      fetchValidatedTab(TABS.inad25YTD, ["valor","inad"]),
-      fetchValidatedTab(TABS.inad26YTD, ["valor","inad"]),
-      fetchValidatedTab(TABS.inad26Atual, ["valor","inad"])
+    const [p24,p25,p26,p26Atual] = await Promise.all([
+      fetchSmartTab(TABS.inad24), fetchSmartTab(TABS.inad25YTD),
+      fetchSmartTab(TABS.inad26YTD), fetchSmartTab(TABS.inad26Atual)
     ]);
-    const v24=sumSecondColumn(r24), v25=sumSecondColumn(r25), v26=sumSecondColumn(r26), v26Atual=sumSecondColumn(r26Atual);
-    setText("inad-2024",fmtBRL(v24),!r24.length);
-    setText("inad-2025",fmtBRL(v25),!r25.length);
-    setText("inad-2026",fmtBRL(v26),!r26.length);
-    setText("inad-2026-atual",fmtBRL(v26Atual),!r26Atual.length);
-    setText("inad-total",fmtBRL(v24+v25+v26),!(r24.length||r25.length||r26.length));
+    const v24=sumRowsSmart(p24), v25=sumRowsSmart(p25), v26=sumRowsSmart(p26), v26Atual=sumRowsSmart(p26Atual);
+    setText("inad-2024",fmtBRL(v24),!isFinite(v24));
+    setText("inad-2025",fmtBRL(v25),!isFinite(v25));
+    setText("inad-2026",fmtBRL(v26),!isFinite(v26));
+    setText("inad-2026-atual",fmtBRL(v26Atual),!isFinite(v26Atual));
+    const vals=[v24,v25,v26].filter(isFinite);
+    setText("inad-total",fmtBRL(vals.reduce((a,b)=>a+b,0)),!vals.length);
     const d25=pctChange(v25,v24), d26=pctChange(v26,v25);
     setCompare("inad-var-25","2025 × 2024",d25,true);
     setCompare("inad-var-26","2026 × 2025",d26,true);
-    setDot("dot-inad", isFinite(d26) ? (d26<=0?"ok":"warn") : "idle");
+    setDot("dot-inad", isFinite(d26) ? (d26<=0?"ok":"warn") : (vals.length?"ok":"idle"));
     if(isFinite(d26) && d26>0) insights.push({level:"alert",text:`Inadimplência 2026 está ${fmtPct(d26)} acima do mesmo período de 2025.`});
     else if(isFinite(d26) && d26<0) insights.push({level:"ok",text:`Inadimplência 2026 está ${fmtPct(Math.abs(d26))} abaixo do mesmo período de 2025.`});
   } catch(e){ console.error("Inadimplência:",e); setDot("dot-inad","alert"); anyError=true; }
 
-  await new Promise(r => setTimeout(r, 120));
-  // -------- Assistência técnica: médias anuais + comparação mensal --------
+  // -------- Assistência técnica: médias anuais + último mês disponível --------
   try {
-    const rows=await fetchValidatedTab(TABS.assist,"percentual");
-    const now=new Date(), pm=prevMonthOf(now);
-    const series=[];
-    for(const r of rows){const d=parseBRDate(r[0]),v=parseBRNumber(r[2]); if(d&&isFinite(v)) series.push({date:d,value:v});}
-    series.sort((a,b)=>a.date-b.date);
-    const a24=avgForYear(series,2024),a25=avgForYear(series,2025),a26=avgForYear(series,2026);
-    const cur=monthValue(series,now.getFullYear(),now.getMonth()), prev=monthValue(series,pm.getFullYear(),pm.getMonth());
-    setText("assist-2024",fmtPct(a24),!isFinite(a24)); setText("assist-2025",fmtPct(a25),!isFinite(a25)); setText("assist-2026",fmtPct(a26),!isFinite(a26));
-    setText("assist-cur",fmtPct(cur),!isFinite(cur)); setText("assist-prev",fmtPct(prev),!isFinite(prev));
-    const d=pctChange(cur,prev); setCompare("assist-var","Mês atual × anterior",d,true);
+    const pack=await fetchSmartTab(TABS.assist);
+    const series=seriesFromTab(pack,[['percentual'],['porcentagem'],['indice'],['%']]);
+    const a24=avgYear(series,2024),a25=avgYear(series,2025),a26=avgYear(series,2026);
+    const pair=latestAvailablePair(series,new Date()), cur=pair.cur?.value, prev=pair.prev?.value;
+    setText("assist-2024",fmtPct(a24),!isFinite(a24));
+    setText("assist-2025",fmtPct(a25),!isFinite(a25));
+    setText("assist-2026",fmtPct(a26),!isFinite(a26));
+    setText("assist-cur",isFinite(cur)?fmtPct(cur):"sem dados",!isFinite(cur));
+    setText("assist-prev",isFinite(prev)?fmtPct(prev):"sem dados",!isFinite(prev));
+    const d=pctChange(cur,prev); setCompare("assist-var","Último mês × anterior",d,true);
     setDot("dot-assist",series.length?(isFinite(d)?(d<=0?"ok":"warn"):"ok"):"idle");
   } catch(e){console.error("Assistência:",e);setDot("dot-assist","alert");anyError=true;}
 
-  await new Promise(r => setTimeout(r, 120));
-  // -------- Fretes: médias 2025/2026 + mês anterior --------
+  // -------- Fretes: médias 2025/2026 + último mês disponível --------
   try {
-    const rows=await fetchValidatedTab(TABS.fretes,"percentual");
-    const now=new Date(),pm=prevMonthOf(now),series=[];
-    for(const r of rows){const d=parseBRDate(r[0]),v=parseBRNumber(r[3]); if(d&&isFinite(v)) series.push({date:d,value:v});}
-    series.sort((a,b)=>a.date-b.date);
-    const a25=avgForYear(series,2025),a26=avgForYear(series,2026),prev=monthValue(series,pm.getFullYear(),pm.getMonth());
-    setText("fretes-2025",fmtPct(a25),!isFinite(a25)); setText("fretes-2026",fmtPct(a26),!isFinite(a26)); setText("fretes-prev",fmtPct(prev),!isFinite(prev));
+    const pack=await fetchSmartTab(TABS.fretes);
+    const series=seriesFromTab(pack,[['percentual'],['porcentagem'],['frete','%'],['indice']]);
+    const a25=avgYear(series,2025),a26=avgYear(series,2026),pair=latestAvailablePair(series,new Date());
+    const prev=pair.prev?.value;
+    setText("fretes-2025",fmtPct(a25),!isFinite(a25));
+    setText("fretes-2026",fmtPct(a26),!isFinite(a26));
+    setText("fretes-prev",isFinite(prev)?fmtPct(prev):"sem dados",!isFinite(prev));
     const d=pctChange(a26,a25); setCompare("fretes-var","Média 2026 × 2025",d,true);
     setDot("dot-fretes",series.length?(isFinite(d)?(d<=0?"ok":"warn"):"ok"):"idle");
   } catch(e){console.error("Fretes:",e);setDot("dot-fretes","alert");anyError=true;}
 
-  await new Promise(r => setTimeout(r, 120));
-  // -------- Verba MKT / Bonificações: ano, mês atual e mês anterior --------
+  // -------- Verba MKT / Bonificações: ano + dois últimos meses com dados --------
   try {
-    const rows=await fetchValidatedTab(TABS.verba,["tipo","situa"]);
-    const now=new Date(),pm=prevMonthOf(now);
-    let mktAno=0,bonifAno=0,mes=0,prev=0,valid=0;
-    for(const r of rows){
-      const d=parseBRDate(r[0]),v=parseBRNumber(r[1]),tipo=(r[2]||"").toString().trim().toUpperCase();
+    const pack=await fetchSmartTab(TABS.verba);
+    const dc=detectDateCol(pack.allRows);
+    const vc=detectNumericCol(pack.allRows,[['valor'],['verba'],['total']],dc>=0?[dc]:[]);
+    const tc=detectTextCol(pack.allRows,[['tipo'],['situacao'],['categoria']]);
+    const now=new Date(); let mktAno=0,bonifAno=0,valid=0; const monthly=new Map();
+    for(const r of pack.rows){
+      const d=dc>=0?parseFlexibleDate(r[dc]):null, v=vc>=0?parseBRNumber(r[vc]):NaN;
+      const tipo=tc>=0?String(r[tc]||'').toUpperCase():'';
       if(!d||!isFinite(v)) continue; valid++;
-      if(d.getFullYear()===now.getFullYear()){ if(tipo.includes("BONIF")) bonifAno+=v; else if(tipo.includes("MKT")||tipo.includes("MARKET")) mktAno+=v; }
-      if(d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()) mes+=v;
-      if(d.getFullYear()===pm.getFullYear()&&d.getMonth()===pm.getMonth()) prev+=v;
+      if(d.getFullYear()===now.getFullYear()){
+        if(tipo.includes('BONIF')) bonifAno+=v;
+        else if(tipo.includes('MKT')||tipo.includes('MARKET')) mktAno+=v;
+      }
+      const k=monthKey(d); monthly.set(k,(monthly.get(k)||0)+v);
     }
-    const totalAno=mktAno+bonifAno;
-    setText("verba-total",fmtBRL(totalAno),!valid); setText("verba-mkt",fmtBRL(mktAno),!valid); setText("verba-bonif",fmtBRL(bonifAno),!valid);
-    setText("verba-mes",fmtBRL(mes),!valid); setText("verba-prev",fmtBRL(prev),!valid);
-    const d=pctChange(mes,prev); setCompare("verba-var","Variação mensal",d,true);
+    const monthEntries=[...monthly.entries()].sort((a,b)=>a[0]-b[0]);
+    const curE=monthEntries.length?monthEntries[monthEntries.length-1]:null;
+    const prevE=monthEntries.length>1?monthEntries[monthEntries.length-2]:null;
+    const mes=curE?curE[1]:NaN, prev=prevE?prevE[1]:NaN, totalAno=mktAno+bonifAno;
+    setText("verba-total",fmtBRL(totalAno),!valid);
+    setText("verba-mkt",fmtBRL(mktAno),!valid);
+    setText("verba-bonif",fmtBRL(bonifAno),!valid);
+    setText("verba-mes",fmtBRL(mes),!isFinite(mes));
+    setText("verba-prev",fmtBRL(prev),!isFinite(prev));
+    const d=pctChange(mes,prev); setCompare("verba-var","Último mês × anterior",d,true);
     setDot("dot-verba",valid?"ok":"idle");
   } catch(e){console.error("Verba MKT:",e);setDot("dot-verba","alert");anyError=true;}
 
-  await new Promise(r => setTimeout(r, 120));
-  // -------- Evolução do faturamento: somente variações percentuais --------
+  // -------- Evolução do faturamento: variações percentuais usando último mês disponível --------
   try {
-    const rows=await fetchValidatedTab(TABS.cresc,"faturamento");
-    const now=new Date(),pm=prevMonthOf(now),series=[];
-    for(const r of rows){const d=parseBRDate(r[0]),v=parseBRNumber(r[1]);if(d&&isFinite(v))series.push({date:d,value:v});}
-    series.sort((a,b)=>a.date-b.date);
-    const cur=monthValue(series,now.getFullYear(),now.getMonth());
-    const prev=monthValue(series,pm.getFullYear(),pm.getMonth());
-    const yoy=monthValue(series,now.getFullYear()-1,now.getMonth());
-    const ytdCur=series.filter(x=>x.date.getFullYear()===now.getFullYear()&&x.date.getMonth()<=now.getMonth()).reduce((a,x)=>a+x.value,0);
-    const ytdPrev=series.filter(x=>x.date.getFullYear()===now.getFullYear()-1&&x.date.getMonth()<=now.getMonth()).reduce((a,x)=>a+x.value,0);
+    const pack=await fetchSmartTab(TABS.cresc);
+    const series=seriesFromTab(pack,[['faturamento'],['valor'],['total']]);
+    const pair=latestAvailablePair(series,new Date()), curObj=pair.cur, prevObj=pair.prev;
+    const cur=curObj?.value, prev=prevObj?.value;
+    let yoy=NaN, ytdCur=0, ytdPrev=0;
+    if(curObj){
+      const targetYear=curObj.date.getFullYear()-1, targetMonth=curObj.date.getMonth();
+      yoy=monthValue(series,targetYear,targetMonth);
+      const maxMonth=curObj.date.getMonth();
+      ytdCur=series.filter(x=>x.date.getFullYear()===curObj.date.getFullYear()&&x.date.getMonth()<=maxMonth).reduce((a,x)=>a+x.value,0);
+      ytdPrev=series.filter(x=>x.date.getFullYear()===targetYear&&x.date.getMonth()<=maxMonth).reduce((a,x)=>a+x.value,0);
+    }
     const mom=pctChange(cur,prev), yy=pctChange(cur,yoy), ytd=pctChange(ytdCur,ytdPrev);
-    setText("cresc-mom",fmtPct(mom),!isFinite(mom)); setText("cresc-yoy",fmtPct(yy),!isFinite(yy)); setText("cresc-ytd",fmtPct(ytd),!isFinite(ytd));
-    const vals=[mom,yy,ytd].filter(isFinite); const avg=vals.length?vals.reduce((a,v)=>a+v,0)/vals.length:NaN;
+
+    function setEvolutionValue(id, value, isHero){
+      const el=document.getElementById(id);
+      if(!el) return;
+      el.classList.remove("idle","positive","negative");
+      if(!isFinite(value)){ el.textContent="sem dados"; el.classList.add("idle"); return; }
+      const arrow=value>0?"↑ ":value<0?"↓ ":"";
+      el.textContent=arrow+fmtPct(Math.abs(value));
+      el.classList.add(value<0?"negative":"positive");
+    }
+
+    // Destaques principais: mês contra mês anterior e ano acumulado contra ano anterior.
+    setEvolutionValue("cresc-mes-destaque",mom,true);
+    setEvolutionValue("cresc-ano-destaque",ytd,true);
+
+    // Comparações auxiliares ficam abaixo, em formato mais compacto.
+    setEvolutionValue("cresc-mom",mom,false);
+    setEvolutionValue("cresc-yoy",yy,false);
+    setEvolutionValue("cresc-ytd",ytd,false);
+    const vals=[mom,yy,ytd].filter(isFinite), avg=vals.length?vals.reduce((a,v)=>a+v,0)/vals.length:NaN;
     setCompare("cresc-resumo","Variação média",avg,false);
     setDot("dot-cresc",vals.length?(avg>=0?"ok":"warn"):"idle");
-    if(isFinite(ytd)&&ytd<0) insights.push({level:"warn",text:`Faturamento acumulado do ano varia ${fmtPct(Math.abs(ytd))} abaixo do mesmo período do ano anterior.`});
+    if(isFinite(ytd)&&ytd<0) insights.push({level:"warn",text:`Faturamento acumulado varia ${fmtPct(Math.abs(ytd))} abaixo do mesmo período do ano anterior.`});
   } catch(e){console.error("Evolução do faturamento:",e);setDot("dot-cresc","alert");anyError=true;}
 
-  await new Promise(r => setTimeout(r, 120));
-  // -------- Itens faltantes: data | porcentagem --------
+  // -------- Itens faltantes: leitura flexível --------
   try {
-    const rows = await fetchValidatedTab(TABS.itens, "porcentagem");
-    const now = new Date();
-    let sum = 0, count = 0, atual = NaN;
-    for (const r of rows) {
-      const d = parseBRDate(r[0]);
-      const pct = parseBRNumber(r[1]);
-      if (!d || !isFinite(pct)) continue;
-      sum += pct; count++;
-      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) atual = pct;
-    }
-    setText("itens-atual", isFinite(atual) ? fmtPct(atual) : "sem dados", !isFinite(atual));
-    setText("itens-media", count ? fmtPct(sum / count) : "sem dados", !count);
-    setDot("dot-itens", count ? "ok" : "idle");
-    if (!count) {
-      insights.push({ level: "warn", text: "A aba de Itens Faltantes ainda não tem nenhum lançamento." });
-    }
-  } catch(e){ console.error("Itens faltantes:", e); setDot("dot-itens","alert"); anyError = true; }
+    const pack=await fetchSmartTab(TABS.itens);
+    const series=seriesFromTab(pack,[['porcentagem'],['percentual'],['indice'],['%']]);
+    const pair=latestAvailablePair(series,new Date());
+    const atual=pair.cur?.value;
+    const media=series.length?series.reduce((s,x)=>s+x.value,0)/series.length:NaN;
+    setText("itens-atual",isFinite(atual)?fmtPct(atual):"sem dados",!isFinite(atual));
+    setText("itens-media",isFinite(media)?fmtPct(media):"sem dados",!isFinite(media));
+    setDot("dot-itens",series.length?"ok":"idle");
+    if(!series.length) insights.push({level:"warn",text:"A aba de Itens Faltantes não retornou uma série percentual reconhecível."});
+  } catch(e){console.error("Itens faltantes:",e);setDot("dot-itens","alert");anyError=true;}
 
   renderInsights(insights);
 
@@ -779,6 +926,9 @@ setInterval(tick, 15000);
 
 loadAll();
 setInterval(loadAll, REFRESH_MINUTES * 60 * 1000);
+window.addEventListener('focus', loadAll);
+window.addEventListener('online', loadAll);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)loadAll();});
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') loadAll(); });
 window.addEventListener('focus',loadAll);
 window.addEventListener('online',loadAll);
