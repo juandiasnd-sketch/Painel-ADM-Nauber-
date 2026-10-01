@@ -560,13 +560,13 @@
       <div class="evolucao-hero">
         <div class="evolucao-main">
           <div class="evolucao-label" id="cresc-mes-label">Mês</div>
-          <div class="evolucao-value amount idle" id="cresc-mes-destaque">—</div>
-          <div class="evolucao-caption" id="cresc-mes-caption">faturamento do mês</div>
+          <div class="evolucao-value idle" id="cresc-mes-destaque">—</div>
+          <div class="evolucao-caption" id="cresc-mes-caption">vs. mês anterior</div>
         </div>
         <div class="evolucao-divider"></div>
         <div class="evolucao-main">
           <div class="evolucao-label" id="cresc-ano-label">Ano</div>
-          <div class="evolucao-value amount idle" id="cresc-ano-destaque">—</div>
+          <div class="evolucao-value idle" id="cresc-ano-destaque">—</div>
           <div class="evolucao-caption" id="cresc-ano-caption">jan/2026 até hoje</div>
         </div>
       </div>
@@ -1125,8 +1125,11 @@ async function loadAll(){
       el.classList.add(value<0?'negative':'positive');
     }
 
-    setEvolutionAmount('cresc-mes-destaque',cur);
-    setEvolutionAmount('cresc-ano-destaque',yearTotal);
+    // Destaques principais sempre em percentual: mês = último mês vs anterior; ano = último mês vs janeiro do mesmo ano.
+    const janObj=ytdSeries.find(x=>x.date.getMonth()===0) || ytdSeries[0];
+    const yearEvolution=(curObj && janObj) ? pctChange(curObj.value,janObj.value) : NaN;
+    setEvolutionPercent('cresc-mes-destaque',mom);
+    setEvolutionPercent('cresc-ano-destaque',yearEvolution);
     setEvolutionPercent('cresc-mom',mom);
     setEvolutionPercent('cresc-yoy',vsAvg);
     setEvolutionPercent('cresc-ytd',avgChange);
@@ -1134,10 +1137,10 @@ async function loadAll(){
     if(curObj){
       const m=monthNameShort(curObj.date);
       document.getElementById('cresc-mes-label').textContent=`Mês · ${m}`;
-      document.getElementById('cresc-mes-caption').textContent=curObj.key===currentKey?'faturamento do mês atual':'último mês disponível';
+      document.getElementById('cresc-mes-caption').textContent=curObj.key===currentKey?'vs. mês anterior':'último mês vs. anterior';
       document.getElementById('cresc-ano-label').textContent=`Ano · ${displayYear}`;
-      document.getElementById('cresc-ano-caption').textContent=`jan/${displayYear} até ${m}`;
-      document.getElementById('cresc-resumo').textContent=`Acumulado jan–${m}: ${fmtBRL(yearTotal)}`;
+      document.getElementById('cresc-ano-caption').textContent=`evolução jan/${displayYear} → ${m}`;
+      document.getElementById('cresc-resumo').textContent=`Evolução jan–${m}: ${isFinite(yearEvolution)?fmtPct(yearEvolution):'sem dados'}`;
     } else {
       document.getElementById('cresc-resumo').textContent='sem dados de faturamento';
     }
