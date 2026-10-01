@@ -223,7 +223,21 @@
   .insight-dot.ok{ background: var(--green); }
   .insights-empty{ color: var(--ink-faint); font-size: clamp(12px, 0.95vw, 14px); }
 
-  /* Verba MKT: 3 valores lado a lado numa única linha. */
+  /* Blocos comparativos revisados */
+  .stat-grid.cols-3{ grid-template-columns:repeat(3,1fr); gap:8px; }
+  .stat-grid.cols-5{ grid-template-columns:repeat(3,1fr); gap:8px; }
+  .stat-grid.cols-5 .stat:nth-child(n+4){ grid-column:span 1; }
+  #inad .stat-grid, #verba .stat-grid, .strip .stat-grid{ gap:8px; }
+  #inad .stat-label, #verba .stat-label, .strip .stat-label{ font-size:10px; margin-bottom:4px; }
+  #inad .stat-chip, #verba .stat-chip, .strip .stat-chip{ padding:8px 6px; }
+  #inad .stat-value, #verba .stat-value, .strip .stat-value{ font-size:clamp(12px,1.05vw,17px); }
+  .compare-row{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:8px; }
+  .compare-pill{ background:var(--chip-bg); color:var(--ink-dim); border-radius:999px; padding:4px 9px; font-size:10px; white-space:nowrap; }
+  .compare-pill.good{ color:#8FE3A6; background:var(--green-soft); }
+  .compare-pill.warn{ color:var(--amber); }
+  .compare-pill.bad{ color:var(--red); background:rgba(224,87,74,.12); }
+
+  /* Verba MKT */
   #verba .stat-grid.cols-4{
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: auto;
@@ -277,51 +291,39 @@
 
     <div class="card" id="inad">
       <div class="pill-title"><span class="status idle" id="dot-inad"></span>Inadimplência</div>
-      <div class="stat-grid">
-        <div class="stat">
-          <div class="stat-label">Acum. 2025 até hoje</div>
-          <div class="stat-chip"><span class="stat-value idle" id="inad-2025">—</span></div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Acum. 2026 até hoje</div>
-          <div class="stat-chip"><span class="stat-value idle" id="inad-2026">—</span></div>
-        </div>
+      <div class="stat-grid cols-3">
+        <div class="stat"><div class="stat-label">Total 2024</div><div class="stat-chip"><span class="stat-value idle" id="inad-2024">—</span></div></div>
+        <div class="stat"><div class="stat-label">2025 · jan até hoje</div><div class="stat-chip"><span class="stat-value idle" id="inad-2025">—</span></div></div>
+        <div class="stat"><div class="stat-label">2026 · jan até hoje</div><div class="stat-chip"><span class="stat-value idle" id="inad-2026">—</span></div></div>
+        <div class="stat"><div class="stat-label">Inadimplência 2026</div><div class="stat-chip"><span class="stat-value idle" id="inad-2026-atual">—</span></div></div>
+        <div class="stat"><div class="stat-label">Total comparável</div><div class="stat-chip"><span class="stat-value idle green" id="inad-total">—</span></div></div>
       </div>
-      <div class="cresc-delta-row"><span class="pill idle" id="inad-delta">sem dados</span></div>
+      <div class="compare-row">
+        <span class="compare-pill" id="inad-var-25">2025 × 2024: —</span>
+        <span class="compare-pill" id="inad-var-26">2026 × 2025: —</span>
+      </div>
     </div>
 
     <div class="card" id="cresc">
-      <div class="pill-title"><span class="status idle" id="dot-cresc"></span>Crescimento — Faturamento</div>
-      <div class="cresc-body">
-        <div class="cresc-col">
-          <div class="stat-label">Mês anterior</div>
-          <div class="stat-chip"><span class="stat-value idle" id="cresc-prev">—</span></div>
-        </div>
-        <div class="cresc-arrow idle" id="cresc-arrow"></div>
-        <div class="cresc-col">
-          <div class="stat-label">Mês atual</div>
-          <div class="stat-chip"><span class="stat-value idle" id="cresc-cur">—</span></div>
-        </div>
+      <div class="pill-title"><span class="status idle" id="dot-cresc"></span>Evolução do Faturamento</div>
+      <div class="stat-grid cols-3">
+        <div class="stat"><div class="stat-label">Mês × mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="cresc-mom">—</span></div></div>
+        <div class="stat"><div class="stat-label">Mês × mesmo mês ano anterior</div><div class="stat-chip"><span class="stat-value idle" id="cresc-yoy">—</span></div></div>
+        <div class="stat"><div class="stat-label">Ano até hoje × ano anterior</div><div class="stat-chip"><span class="stat-value idle" id="cresc-ytd">—</span></div></div>
       </div>
-      <div class="cresc-delta-row"><span class="pill idle" id="cresc-delta">sem dados</span></div>
+      <div class="compare-row"><span class="compare-pill" id="cresc-resumo">comparativo de variação</span></div>
     </div>
 
     <div class="card" id="verba">
       <div class="pill-title"><span class="status idle" id="dot-verba"></span>Verba MKT &amp; Bonificações</div>
-      <div class="stat-grid cols-4">
-        <div class="stat">
-          <div class="stat-label">Verba marketing (acum.)</div>
-          <div class="stat-chip"><span class="stat-value idle" id="verba-mkt">—</span></div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Bonificações (acum.)</div>
-          <div class="stat-chip"><span class="stat-value idle" id="verba-bonif">—</span></div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Total acumulado</div>
-          <div class="stat-chip"><span class="stat-value idle green" id="verba-total">—</span></div>
-        </div>
+      <div class="stat-grid cols-5">
+        <div class="stat"><div class="stat-label">Total do ano</div><div class="stat-chip"><span class="stat-value idle green" id="verba-total">—</span></div></div>
+        <div class="stat"><div class="stat-label">Marketing · ano</div><div class="stat-chip"><span class="stat-value idle" id="verba-mkt">—</span></div></div>
+        <div class="stat"><div class="stat-label">Bonificações · ano</div><div class="stat-chip"><span class="stat-value idle" id="verba-bonif">—</span></div></div>
+        <div class="stat"><div class="stat-label">Mês atual</div><div class="stat-chip"><span class="stat-value idle" id="verba-mes">—</span></div></div>
+        <div class="stat"><div class="stat-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="verba-prev">—</span></div></div>
       </div>
+      <div class="compare-row"><span class="compare-pill" id="verba-var">Variação mensal: —</span></div>
     </div>
 
     <div class="card" id="insights">
@@ -336,29 +338,23 @@
     <div class="strip">
       <div class="card">
         <div class="pill-title"><span class="status idle" id="dot-fretes"></span>Fretes</div>
-        <div class="stat-grid">
-          <div class="stat">
-            <div class="stat-label">Média 2025</div>
-            <div class="stat-chip"><span class="stat-value idle" id="fretes-acum">—</span></div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Mês atual</div>
-            <div class="stat-chip"><span class="stat-value idle" id="fretes-mes">—</span></div>
-          </div>
+        <div class="stat-grid cols-3">
+          <div class="stat"><div class="stat-label">Média 2025</div><div class="stat-chip"><span class="stat-value idle" id="fretes-2025">—</span></div></div>
+          <div class="stat"><div class="stat-label">Média 2026</div><div class="stat-chip"><span class="stat-value idle" id="fretes-2026">—</span></div></div>
+          <div class="stat"><div class="stat-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="fretes-prev">—</span></div></div>
         </div>
+        <div class="compare-row"><span class="compare-pill" id="fretes-var">2026 × 2025: —</span></div>
       </div>
       <div class="card">
         <div class="pill-title"><span class="status idle" id="dot-assist"></span>Assistência Técnica</div>
-        <div class="stat-grid">
-          <div class="stat">
-            <div class="stat-label">Média até hoje</div>
-            <div class="stat-chip"><span class="stat-value idle" id="assist-acum">—</span></div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Mês atual</div>
-            <div class="stat-chip"><span class="stat-value idle" id="assist-mes">—</span></div>
-          </div>
+        <div class="stat-grid cols-3">
+          <div class="stat"><div class="stat-label">Média 2024</div><div class="stat-chip"><span class="stat-value idle" id="assist-2024">—</span></div></div>
+          <div class="stat"><div class="stat-label">Média 2025</div><div class="stat-chip"><span class="stat-value idle" id="assist-2025">—</span></div></div>
+          <div class="stat"><div class="stat-label">Média 2026</div><div class="stat-chip"><span class="stat-value idle" id="assist-2026">—</span></div></div>
+          <div class="stat"><div class="stat-label">Mês atual</div><div class="stat-chip"><span class="stat-value idle" id="assist-cur">—</span></div></div>
+          <div class="stat"><div class="stat-label">Mês anterior</div><div class="stat-chip"><span class="stat-value idle" id="assist-prev">—</span></div></div>
         </div>
+        <div class="compare-row"><span class="compare-pill" id="assist-var">Variação: —</span></div>
       </div>
       <div class="card">
         <div class="pill-title"><span class="status idle" id="dot-itens"></span>% Itens Faltantes</div>
@@ -397,16 +393,19 @@ const SHEET_ID = "1YvCKNBSCYs2rHHS8_BQVw4pFZJ1RPEN1Sr3-qSB9FDQ";
 // espaço/caractere invisível no nome real, diferente do que aparece na
 // interface). O gid nunca tem esse problema.
 const TABS = {
-  inad:   { name: "Inadimplencia 2026", gid: "2078989979" },
-  assist: { name: "Assit Tecnica",      gid: "1186541042" },
-  fretes: { name: "Fretes",             gid: "1921403787" },
-  verba:  { name: "Verba Marke",        gid: "366040743"  },
-  cresc:  { name: "Crescimento",        gid: "709353876"  },
-  itens:  { name: "Itens Faltantes",    gid: "210770760"  },
-  fat:    { name: "NFs Faturadas",      gid: "1635996717" },
+  inad26Atual: { name: "Inadimplencia 2026",       gid: "2078989979" },
+  inad25YTD:   { name: "jan-2025 ate dias atuais", gid: "1164840342" },
+  inad26YTD:   { name: "jan2026 ate dias atuais",  gid: "1717647600" },
+  inad24:      { name: "Inadimplencia 2024",       gid: "859482889"  },
+  assist:      { name: "Assit Tecnica",            gid: "1186541042" },
+  fretes:      { name: "Fretes",                   gid: "1921403787" },
+  verba:       { name: "Verba Marke",              gid: "366040743"  },
+  cresc:       { name: "Crescimento",              gid: "709353876"  },
+  itens:       { name: "Itens Faltantes",          gid: "210770760"  },
+  fat:         { name: "NFs Faturadas",            gid: "1635996717" },
 };
 
-const REFRESH_MINUTES = 5;
+const REFRESH_MINUTES = 1;
 
 /* ========================================================================= */
 
@@ -549,7 +548,25 @@ function renderInsights(insights){
   ).join("");
 }
 
+function pctChange(cur, prev){ return isFinite(cur) && isFinite(prev) && prev !== 0 ? ((cur-prev)/prev)*100 : NaN; }
+function setCompare(id, label, value, lowerIsBetter=false){
+  const el=document.getElementById(id); if(!el) return;
+  el.className='compare-pill';
+  if(!isFinite(value)){ el.textContent=label+': sem dados'; return; }
+  const arrow=value>0?'↑':value<0?'↓':'→';
+  el.textContent=label+': '+arrow+' '+fmtPct(Math.abs(value));
+  const good=lowerIsBetter ? value<=0 : value>=0;
+  el.classList.add(good?'good':'bad');
+}
+function avgForYear(series, year){ const a=series.filter(x=>x.date.getFullYear()===year).map(x=>x.value); return a.length?a.reduce((s,v)=>s+v,0)/a.length:NaN; }
+function monthValue(series, year, month){ const a=series.filter(x=>x.date.getFullYear()===year && x.date.getMonth()===month); return a.length?a[a.length-1].value:NaN; }
+function prevMonthOf(d){ return new Date(d.getFullYear(),d.getMonth()-1,1); }
+function sumSecondColumn(rows){ return rows.reduce((s,r)=>{const v=parseBRNumber(r[1]);return s+(isFinite(v)?v:0)},0); }
+let loadingAll=false;
+
 async function loadAll(){
+  if(loadingAll) return;
+  loadingAll=true;
   let anyError = false;
   const insights = [];
 
@@ -626,159 +643,98 @@ async function loadAll(){
   } catch(e){ console.error("Faturamento:", e); setDot("dot-fat","alert"); anyError = true; }
 
   await new Promise(r => setTimeout(r, 200));
-  // -------- Inadimplência: Inadimplencia 2026 (data | valor, histórico completo) --------
+  // -------- Inadimplência: quatro abas dedicadas --------
   try {
-    const rows = await fetchValidatedTab(TABS.inad, "valor");
-    const today = new Date();
-    let acum25 = 0, acum26 = 0;
-    for (const r of rows) {
-      const d = parseBRDate(r[0]);
-      const v = parseBRNumber(r[1]);
-      if (!d || !isFinite(v)) continue;
-      if (d > today) continue;
-      // "Acum 2025" = total acumulado desde o início até o fim de 2025
-      // (não é só o ano de 2025 isolado — o painel original soma tudo
-      // que veio antes, 2024 incluso). "Acum 2026" é só o ano corrente.
-      if (d.getFullYear() <= 2025) acum25 += v;
-      if (d.getFullYear() === 2026) acum26 += v;
-    }
-    setText("inad-2025", fmtBRL(acum25));
-    setText("inad-2026", fmtBRL(acum26));
-    if (acum25 > 0) {
-      const delta = ((acum26 - acum25) / acum25) * 100;
-      const arrow = delta <= 0 ? "↓" : "↑";
-      const el = document.getElementById("inad-delta");
-      el.classList.remove("idle");
-      el.textContent = arrow + " " + fmtPct(Math.abs(delta));
-      el.classList.toggle("up", delta > 0);
-      setDot("dot-inad", delta <= 0 ? "ok" : "warn");
-      if (delta > 0) {
-        insights.push({ level: "alert", text:
-          `Inadimplência de 2026 já supera o acumulado anterior em ${fmtPct(delta)}.` });
-      } else if (delta <= -30) {
-        insights.push({ level: "ok", text:
-          `Inadimplência caiu ${fmtPct(Math.abs(delta))} frente ao acumulado anterior.` });
-      }
-    } else {
-      setDot("dot-inad", "idle");
-    }
-  } catch(e){ console.error("Inadimplência:", e); setDot("dot-inad","alert"); anyError = true; }
+    const [r24,r25,r26,r26Atual] = await Promise.all([
+      fetchValidatedTab(TABS.inad24, ["valor","inad"]),
+      fetchValidatedTab(TABS.inad25YTD, ["valor","inad"]),
+      fetchValidatedTab(TABS.inad26YTD, ["valor","inad"]),
+      fetchValidatedTab(TABS.inad26Atual, ["valor","inad"])
+    ]);
+    const v24=sumSecondColumn(r24), v25=sumSecondColumn(r25), v26=sumSecondColumn(r26), v26Atual=sumSecondColumn(r26Atual);
+    setText("inad-2024",fmtBRL(v24),!r24.length);
+    setText("inad-2025",fmtBRL(v25),!r25.length);
+    setText("inad-2026",fmtBRL(v26),!r26.length);
+    setText("inad-2026-atual",fmtBRL(v26Atual),!r26Atual.length);
+    setText("inad-total",fmtBRL(v24+v25+v26),!(r24.length||r25.length||r26.length));
+    const d25=pctChange(v25,v24), d26=pctChange(v26,v25);
+    setCompare("inad-var-25","2025 × 2024",d25,true);
+    setCompare("inad-var-26","2026 × 2025",d26,true);
+    setDot("dot-inad", isFinite(d26) ? (d26<=0?"ok":"warn") : "idle");
+    if(isFinite(d26) && d26>0) insights.push({level:"alert",text:`Inadimplência 2026 está ${fmtPct(d26)} acima do mesmo período de 2025.`});
+    else if(isFinite(d26) && d26<0) insights.push({level:"ok",text:`Inadimplência 2026 está ${fmtPct(Math.abs(d26))} abaixo do mesmo período de 2025.`});
+  } catch(e){ console.error("Inadimplência:",e); setDot("dot-inad","alert"); anyError=true; }
 
-  await new Promise(r => setTimeout(r, 200));
-  // -------- Assistência técnica: data | Valores gastos | percentual --------
+  await new Promise(r => setTimeout(r, 120));
+  // -------- Assistência técnica: médias anuais + comparação mensal --------
   try {
-    const rows = await fetchValidatedTab(TABS.assist, "percentual");
-    const now = new Date();
-    let sum = 0, count = 0, mesVal = NaN;
-    for (const r of rows) {
-      const d = parseBRDate(r[0]);
-      const pct = parseBRNumber(r[2]);
-      if (!d || !isFinite(pct)) continue;
-      sum += pct; count++;
-      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) mesVal = pct;
-    }
-    setText("assist-acum", count ? fmtPct(sum / count) : "sem dados", !count);
-    setText("assist-mes", isFinite(mesVal) ? fmtPct(mesVal) : "sem dados", !isFinite(mesVal));
-    setDot("dot-assist", rows.length ? "ok" : "idle");
+    const rows=await fetchValidatedTab(TABS.assist,"percentual");
+    const now=new Date(), pm=prevMonthOf(now);
+    const series=[];
+    for(const r of rows){const d=parseBRDate(r[0]),v=parseBRNumber(r[2]); if(d&&isFinite(v)) series.push({date:d,value:v});}
+    series.sort((a,b)=>a.date-b.date);
+    const a24=avgForYear(series,2024),a25=avgForYear(series,2025),a26=avgForYear(series,2026);
+    const cur=monthValue(series,now.getFullYear(),now.getMonth()), prev=monthValue(series,pm.getFullYear(),pm.getMonth());
+    setText("assist-2024",fmtPct(a24),!isFinite(a24)); setText("assist-2025",fmtPct(a25),!isFinite(a25)); setText("assist-2026",fmtPct(a26),!isFinite(a26));
+    setText("assist-cur",fmtPct(cur),!isFinite(cur)); setText("assist-prev",fmtPct(prev),!isFinite(prev));
+    const d=pctChange(cur,prev); setCompare("assist-var","Mês atual × anterior",d,true);
+    setDot("dot-assist",series.length?(isFinite(d)?(d<=0?"ok":"warn"):"ok"):"idle");
+  } catch(e){console.error("Assistência:",e);setDot("dot-assist","alert");anyError=true;}
 
-    const validDates = rows.map(r => parseBRDate(r[0])).filter(Boolean);
-    if (validDates.length) {
-      const last = new Date(Math.max(...validDates));
-      const days = daysSince(last, now);
-      if (days > 45) {
-        insights.push({ level: "warn", text:
-          `Assistência técnica sem novo lançamento há ${days} dias (último em ${fmtDateBR(last)}).` });
-      }
-    }
-  } catch(e){ console.error("Assistência:", e); setDot("dot-assist","alert"); anyError = true; }
-
-  await new Promise(r => setTimeout(r, 200));
-  // -------- Fretes: data | Valores gastos | valor nf | percentual --------
+  await new Promise(r => setTimeout(r, 120));
+  // -------- Fretes: médias 2025/2026 + mês anterior --------
   try {
-    const rows = await fetchValidatedTab(TABS.fretes, "percentual");
-    const now = new Date();
-    let sum25 = 0, count25 = 0, mesVal = NaN;
-    for (const r of rows) {
-      const d = parseBRDate(r[0]);
-      const pct = parseBRNumber(r[3]);
-      if (!d || !isFinite(pct)) continue;
-      if (d.getFullYear() === 2025) { sum25 += pct; count25++; }
-      if (d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth()) mesVal = pct;
-    }
-    setText("fretes-acum", count25 ? fmtPct(sum25 / count25) : "sem dados", !count25);
-    setText("fretes-mes", isFinite(mesVal) ? fmtPct(mesVal) : "sem dados", !isFinite(mesVal));
-    setDot("dot-fretes", rows.length ? "ok" : "idle");
+    const rows=await fetchValidatedTab(TABS.fretes,"percentual");
+    const now=new Date(),pm=prevMonthOf(now),series=[];
+    for(const r of rows){const d=parseBRDate(r[0]),v=parseBRNumber(r[3]); if(d&&isFinite(v)) series.push({date:d,value:v});}
+    series.sort((a,b)=>a.date-b.date);
+    const a25=avgForYear(series,2025),a26=avgForYear(series,2026),prev=monthValue(series,pm.getFullYear(),pm.getMonth());
+    setText("fretes-2025",fmtPct(a25),!isFinite(a25)); setText("fretes-2026",fmtPct(a26),!isFinite(a26)); setText("fretes-prev",fmtPct(prev),!isFinite(prev));
+    const d=pctChange(a26,a25); setCompare("fretes-var","Média 2026 × 2025",d,true);
+    setDot("dot-fretes",series.length?(isFinite(d)?(d<=0?"ok":"warn"):"ok"):"idle");
+  } catch(e){console.error("Fretes:",e);setDot("dot-fretes","alert");anyError=true;}
 
-    const validDatesF = rows.map(r => parseBRDate(r[0])).filter(Boolean);
-    if (validDatesF.length) {
-      const lastF = new Date(Math.max(...validDatesF));
-      const daysF = daysSince(lastF, now);
-      if (daysF > 45) {
-        insights.push({ level: "warn", text:
-          `Fretes sem novo lançamento há ${daysF} dias (último em ${fmtDateBR(lastF)}).` });
-      }
-    }
-  } catch(e){ console.error("Fretes:", e); setDot("dot-fretes","alert"); anyError = true; }
-
-  await new Promise(r => setTimeout(r, 200));
-  // -------- Verba MKT / Bonificações: data | valor | tipo --------
+  await new Promise(r => setTimeout(r, 120));
+  // -------- Verba MKT / Bonificações: ano, mês atual e mês anterior --------
   try {
-    const rows = await fetchValidatedTab(TABS.verba, ["tipo","situa"]);
-    let mktTotal = 0, bonifTotal = 0;
-    for (const r of rows) {
-      const v = parseBRNumber(r[1]);
-      const tipo = (r[2] || "").toString().trim().toUpperCase();
-      if (!isFinite(v)) continue;
-      if (tipo.includes("BONIF")) bonifTotal += v;
-      else if (tipo.includes("MKT") || tipo.includes("MARKET")) mktTotal += v;
+    const rows=await fetchValidatedTab(TABS.verba,["tipo","situa"]);
+    const now=new Date(),pm=prevMonthOf(now);
+    let mktAno=0,bonifAno=0,mes=0,prev=0,valid=0;
+    for(const r of rows){
+      const d=parseBRDate(r[0]),v=parseBRNumber(r[1]),tipo=(r[2]||"").toString().trim().toUpperCase();
+      if(!d||!isFinite(v)) continue; valid++;
+      if(d.getFullYear()===now.getFullYear()){ if(tipo.includes("BONIF")) bonifAno+=v; else if(tipo.includes("MKT")||tipo.includes("MARKET")) mktAno+=v; }
+      if(d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()) mes+=v;
+      if(d.getFullYear()===pm.getFullYear()&&d.getMonth()===pm.getMonth()) prev+=v;
     }
-    setText("verba-mkt", fmtBRL(mktTotal));
-    setText("verba-bonif", fmtBRL(bonifTotal));
-    setText("verba-total", fmtBRL(mktTotal + bonifTotal));
-    setDot("dot-verba", rows.length ? "ok" : "idle");
-  } catch(e){ console.error("Verba MKT:", e); setDot("dot-verba","alert"); anyError = true; }
+    const totalAno=mktAno+bonifAno;
+    setText("verba-total",fmtBRL(totalAno),!valid); setText("verba-mkt",fmtBRL(mktAno),!valid); setText("verba-bonif",fmtBRL(bonifAno),!valid);
+    setText("verba-mes",fmtBRL(mes),!valid); setText("verba-prev",fmtBRL(prev),!valid);
+    const d=pctChange(mes,prev); setCompare("verba-var","Variação mensal",d,true);
+    setDot("dot-verba",valid?"ok":"idle");
+  } catch(e){console.error("Verba MKT:",e);setDot("dot-verba","alert");anyError=true;}
 
-  await new Promise(r => setTimeout(r, 200));
-  // -------- Crescimento: data | faturamento (mensal, R$) --------
+  await new Promise(r => setTimeout(r, 120));
+  // -------- Evolução do faturamento: somente variações percentuais --------
   try {
-    const rows = await fetchValidatedTab(TABS.cresc, "faturamento");
-    const series = [];
-    for (const r of rows) {
-      const d = parseBRDate(r[0]);
-      const v = parseBRNumber(r[1]);
-      if (d && isFinite(v)) series.push({date: d, value: v});
-    }
-    series.sort((a,b) => a.date - b.date);
-    const cur = series.length ? series[series.length-1] : null;
-    const prev = series.length > 1 ? series[series.length-2] : null;
-    setText("cresc-cur", cur ? fmtBRL(cur.value) : "sem dados", !cur);
-    setText("cresc-prev", prev ? fmtBRL(prev.value) : "sem dados", !prev);
-    const arrowEl = document.getElementById("cresc-arrow");
-    if (cur && prev && prev.value > 0) {
-      const delta = ((cur.value - prev.value) / prev.value) * 100;
-      const arrow = delta >= 0 ? "↑" : "↓";
-      arrowEl.classList.remove("idle");
-      arrowEl.textContent = arrow;
-      const cd = document.getElementById("cresc-delta");
-      cd.classList.remove("idle");
-      cd.textContent = arrow + " " + fmtPct(Math.abs(delta));
-      cd.classList.toggle("up", delta < 0);
-      setDot("dot-cresc", delta >= 0 ? "ok" : "warn");
-      if (delta <= -30) {
-        insights.push({ level: "alert", text:
-          `Faturamento mensal caiu ${fmtPct(Math.abs(delta))} em relação ao mês anterior.` });
-      } else if (delta >= 30) {
-        insights.push({ level: "ok", text:
-          `Faturamento mensal cresceu ${fmtPct(delta)} em relação ao mês anterior.` });
-      }
-    } else {
-      arrowEl.classList.add("idle");
-      arrowEl.textContent = "";
-      setDot("dot-cresc", "idle");
-    }
-  } catch(e){ console.error("Crescimento:", e); setDot("dot-cresc","alert"); anyError = true; }
+    const rows=await fetchValidatedTab(TABS.cresc,"faturamento");
+    const now=new Date(),pm=prevMonthOf(now),series=[];
+    for(const r of rows){const d=parseBRDate(r[0]),v=parseBRNumber(r[1]);if(d&&isFinite(v))series.push({date:d,value:v});}
+    series.sort((a,b)=>a.date-b.date);
+    const cur=monthValue(series,now.getFullYear(),now.getMonth());
+    const prev=monthValue(series,pm.getFullYear(),pm.getMonth());
+    const yoy=monthValue(series,now.getFullYear()-1,now.getMonth());
+    const ytdCur=series.filter(x=>x.date.getFullYear()===now.getFullYear()&&x.date.getMonth()<=now.getMonth()).reduce((a,x)=>a+x.value,0);
+    const ytdPrev=series.filter(x=>x.date.getFullYear()===now.getFullYear()-1&&x.date.getMonth()<=now.getMonth()).reduce((a,x)=>a+x.value,0);
+    const mom=pctChange(cur,prev), yy=pctChange(cur,yoy), ytd=pctChange(ytdCur,ytdPrev);
+    setText("cresc-mom",fmtPct(mom),!isFinite(mom)); setText("cresc-yoy",fmtPct(yy),!isFinite(yy)); setText("cresc-ytd",fmtPct(ytd),!isFinite(ytd));
+    const vals=[mom,yy,ytd].filter(isFinite); const avg=vals.length?vals.reduce((a,v)=>a+v,0)/vals.length:NaN;
+    setCompare("cresc-resumo","Variação média",avg,false);
+    setDot("dot-cresc",vals.length?(avg>=0?"ok":"warn"):"idle");
+    if(isFinite(ytd)&&ytd<0) insights.push({level:"warn",text:`Faturamento acumulado do ano varia ${fmtPct(Math.abs(ytd))} abaixo do mesmo período do ano anterior.`});
+  } catch(e){console.error("Evolução do faturamento:",e);setDot("dot-cresc","alert");anyError=true;}
 
-  await new Promise(r => setTimeout(r, 200));
+  await new Promise(r => setTimeout(r, 120));
   // -------- Itens faltantes: data | porcentagem --------
   try {
     const rows = await fetchValidatedTab(TABS.itens, "porcentagem");
@@ -805,6 +761,7 @@ async function loadAll(){
   document.getElementById("syncText").textContent =
     (anyError ? "sincronizado parcialmente às " : "atualizado às ") +
     new Date().toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+  loadingAll=false;
 }
 
 function tick(){
@@ -822,6 +779,9 @@ setInterval(tick, 15000);
 
 loadAll();
 setInterval(loadAll, REFRESH_MINUTES * 60 * 1000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible') loadAll(); });
+window.addEventListener('focus',loadAll);
+window.addEventListener('online',loadAll);
 </script>
 
 </body>
